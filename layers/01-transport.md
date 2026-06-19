@@ -24,4 +24,4 @@ Defines how agents discover each other's endpoints and invoke compute tasks. Thi
 ## Related
 
 - [RFC-0001 §6](../RFC-0001-vision.md)
-- [Layer 5 — Capability Registry](05-capability-registry.md) (discovery)
+- [Layer 5 — Discovery (ARD Binding)](05-discovery.md)

@@ -12,7 +12,7 @@ The spec is divided into **7 layers**. Each layer has its own document in `layer
 | 2 — Task Format | [layers/02-task-format.md](layers/02-task-format.md) | `wg-task-format` |
 | 3 — Proof of Execution | [layers/03-proof-of-execution.md](layers/03-proof-of-execution.md) | `wg-proof-of-execution` |
 | 4 — Escrow & Settlement | [layers/04-escrow-settlement.md](layers/04-escrow-settlement.md) | `wg-escrow` |
-| 5 — Capability Registry | [layers/05-capability-registry.md](layers/05-capability-registry.md) | `wg-registry` |
+| 5 — Discovery ([→ ARD](https://agenticresourcediscovery.org)) | [layers/05-discovery.md](layers/05-discovery.md) | `wg-discovery` |
 | 6 — Negotiation Protocol | [layers/06-negotiation-protocol.md](layers/06-negotiation-protocol.md) | `wg-negotiation` |
 | 7 — Agent Wallet | [layers/07-agent-wallet.md](layers/07-agent-wallet.md) | `wg-wallet` |
 
@@ -28,7 +28,7 @@ The spec is divided into **7 layers**. Each layer has its own document in `layer
 - **Protocol engineers** — for Layers 1, 2, 6
 - **Security researchers** — for Layer 3 (Proof of Execution)
 - **Fintech / payments engineers** — for Layer 4 (Escrow)
-- **Distributed systems engineers** — for Layer 5 (Registry)
+- **Distributed systems engineers** — for Layer 5 (ARD binding / discovery integration)
 - **AI framework authors** — for Layer 7 (Wallet integration)
 - **Economists / mechanism designers** — for Layer 6 (Negotiation) and CU tier definitions
 - **Regulatory / legal experts** — for the open question on CU token classification

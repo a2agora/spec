@@ -23,7 +23,7 @@ This RFC describes the problem that A2Agora / ACMP aims to solve, the design pri
 ```mermaid
 sequenceDiagram
     participant H as Hermes-7B (buyer)
-    participant R as Capability Registry
+    participant R as Discovery (ARD)
     participant O as OpenClaw-3 (provider)
     participant E as Escrow
 
@@ -75,6 +75,8 @@ Today's landscape:
 
 None of these allow an agent to autonomously discover, negotiate, execute, verify, and pay for a compute task from another agent in a single composable workflow.
 
+- **Discovery specifications** (e.g. [ARD — Agentic Resource Discovery](https://agenticresourcediscovery.org), backed by Microsoft, Google, Nvidia, and others) are emerging to solve how agents find available capabilities. ARD answers *"what exists?"* — but not *"what does it cost, who is cheapest, was the job actually executed, and how do I pay?"* ACMP builds on discovery to add the economic layer that is missing.
+
 ## 2. The Core Use Cases
 
 ### 2.1 Task Delegation
@@ -114,7 +116,7 @@ An agent or its operator has unused inference capacity. It advertises this capac
 ## 4. What A2Agora Is Not
 
 - **Not a payment network.** ACMP defines the protocol for negotiation and settlement signaling. The actual movement of value (fiat, stablecoin, or CU token) is handled by a pluggable settlement layer (Layer 4).
-- **Not a model registry.** ACMP is not concerned with model capabilities, benchmarks, or rankings — only with the economic and operational primitives needed to trade compute.
+- **Not a discovery protocol.** ACMP delegates capability discovery to existing standards like [ARD](https://agenticresourcediscovery.org). ACMP adds the economic layer — pricing, negotiation, settlement, and verification — on top of discovery.
 - **Not an agent framework.** ACMP does not define how agents are built, orchestrated, or prompted. It defines how they interact economically.
 - **Not a finished spec.** This is a living document. Sections marked `[OPEN]` are explicitly unresolved and invite contribution.
 
@@ -138,7 +140,7 @@ A **Compute Unit (CU)** is the unit of account in ACMP. It is:
 ┌─────────────────────────────────────────────┐
 │  Layer 7 — Agent Wallet & Identity          │
 │  Layer 6 — Negotiation Protocol             │
-│  Layer 5 — Capability Registry              │
+│  Layer 5 — Discovery (→ ARD)         [ext]  │
 │  Layer 4 — Escrow & Settlement              │
 │  Layer 3 — Proof of Execution               │
 │  Layer 2 — Task Decomposition Format        │
@@ -146,7 +148,7 @@ A **Compute Unit (CU)** is the unit of account in ACMP. It is:
 └─────────────────────────────────────────────┘
 ```
 
-Lower layers are more foundational. Layer 1 (Transport) is the natural starting point for implementation. Layer 3 (Proof of Execution) and Layer 6 (Negotiation) are the most novel and most in need of community input.
+Lower layers are more foundational. Layer 1 (Transport) is the natural starting point for implementation. Layer 5 (Discovery) is delegated to the [ARD specification](https://agenticresourcediscovery.org); ACMP defines a binding that extends ARD entries with pricing and SLA metadata. Layer 3 (Proof of Execution) and Layer 6 (Negotiation) are the most novel and most in need of community input.
 
 ---
 
