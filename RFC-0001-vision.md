@@ -77,6 +77,25 @@ None of these allow an agent to autonomously discover, negotiate, execute, verif
 
 - **Discovery specifications** (e.g. [ARD — Agentic Resource Discovery](https://agenticresourcediscovery.org), backed by Microsoft, Google, Nvidia, and others) are emerging to solve how agents find available capabilities. ARD answers *"what exists?"* — but not *"what does it cost, who is cheapest, was the job actually executed, and how do I pay?"* ACMP builds on discovery to add the economic layer that is missing.
 
+### Where ACMP Fits in the Ecosystem
+
+The infrastructure for autonomous agents is emerging in layers, each owned by a different initiative:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  MCP (Model Context Protocol)         — Communication        │
+│  How agents talk to tools and each other                     │
+├──────────────────────────────────────────────────────────────┤
+│  ARD (Agentic Resource Discovery)     — Discovery            │
+│  How agents find available capabilities                      │
+├──────────────────────────────────────────────────────────────┤
+│  ACMP (Agent Compute Market Protocol) — Commerce             │
+│  How agents negotiate, pay, and verify compute               │
+└──────────────────────────────────────────────────────────────┘
+```
+
+MCP ([Agentic AI Foundation](https://aaif.io)) solves communication. ARD ([Microsoft, Google, Nvidia, et al.](https://agenticresourcediscovery.org)) solves discovery. **Nobody is building the economic layer.** ACMP fills this gap — it does not compete with MCP or ARD, it completes the stack.
+
 ## 2. The Core Use Cases
 
 ### 2.1 Task Delegation
