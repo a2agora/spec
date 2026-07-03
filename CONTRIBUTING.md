@@ -22,6 +22,7 @@ The spec is divided into **7 layers**. Each layer has its own document in `layer
 - **Write a comparison.** How does an existing system (Akash, Vast.ai, MCP, Stripe) address a problem in one of the layers? A well-researched comparison issue is extremely valuable.
 - **Draft a schema.** Pick a `[OPEN]` question about a message format or data structure, propose a concrete schema, and open a PR to the relevant layer document.
 - **Review RFC-0001.** The vision document is intentionally incomplete. If something is wrong, missing, or unclear — open an issue with label `rfc-0001`.
+- **Extend the reference SDK.** A Python reference implementation of Layers 1, 2, and 6 lives at [github.com/a2agora/sdk-reference](https://github.com/a2agora/sdk-reference) ([Codeberg mirror](https://codeberg.org/a2agora/sdk-reference)). Streaming, cancellation, and additional transports are not implemented yet — good entry points for a first PR.
 
 ## What we're especially looking for
 

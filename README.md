@@ -41,6 +41,13 @@ This is a **pre-v0 specification**. Everything is open for discussion. The goal 
 
 Read [RFC-0001](RFC-0001-vision.md) for the full problem statement and design rationale.
 
+## Reference Implementation
+
+A dependency-light Python reference SDK implements Layers 1 (Transport), 2 (Task Decomposition), and 6 (Negotiation): buyer/provider transactions, price negotiation, and DAG task orchestration over MCP/JSON-RPC. It exists to prove the spec is implementable — not as a production framework.
+
+- GitHub: [github.com/a2agora/sdk-reference](https://github.com/a2agora/sdk-reference)
+- Codeberg: [codeberg.org/a2agora/sdk-reference](https://codeberg.org/a2agora/sdk-reference)
+
 ## Contributing
 
 This project is organized around **Working Groups** — one per layer. Each working group owns its layer's spec document and maintains a set of open issues for that layer.
