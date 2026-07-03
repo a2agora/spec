@@ -79,22 +79,27 @@ None of these allow an agent to autonomously discover, negotiate, execute, verif
 
 ### Where ACMP Fits in the Ecosystem
 
-The infrastructure for autonomous agents is emerging in layers, each owned by a different initiative:
+The infrastructure for autonomous agents is emerging in layers, each owned by a different initiative. ACMP is the coordination layer on top: it orchestrates the layers below into a functioning market.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  MCP (Model Context Protocol)         — Communication        │
-│  How agents talk to tools and each other                     │
-├──────────────────────────────────────────────────────────────┤
-│  ARD (Agentic Resource Discovery)     — Discovery            │
-│  How agents find available capabilities                      │
-├──────────────────────────────────────────────────────────────┤
-│  ACMP (Agent Compute Market Protocol) — Commerce             │
-│  How agents negotiate, pay, and verify compute               │
+│  ACMP (Agent Compute Market Protocol) — Market               │
+│  Negotiate, price, verify — orchestrates all three below     │
 └──────────────────────────────────────────────────────────────┘
+         │ talk               │ find               │ settle
+         ▼                    ▼                    ▼
+┌────────────────────┬────────────────────┬────────────────────┐
+│  MCP               │  ARD               │  x402 & rails      │
+│  Communication     │  Discovery         │  Settlement        │
+│  (agents talk)     │  (find capability) │  (value moves)     │
+└────────────────────┴────────────────────┴────────────────────┘
 ```
 
-MCP ([Agentic AI Foundation](https://aaif.io)) solves communication. ARD ([Microsoft, Google, Nvidia, et al.](https://agenticresourcediscovery.org)) solves discovery. **Nobody is building the economic layer.** ACMP fills this gap — it does not compete with MCP or ARD, it completes the stack.
+ACMP builds on three substrates it does not own. MCP ([Agentic AI Foundation](https://aaif.io)) solves communication — how agents talk. ARD ([Microsoft, Google, Nvidia, et al.](https://agenticresourcediscovery.org)) solves discovery — how agents find capabilities. Settlement rails — most prominently **[x402](https://x402.org)** (open-sourced by Coinbase, now under the Linux Foundation with Visa, Mastercard, Google, Amazon, Stripe, and others) — solve *value movement*: how money actually flows once a price is agreed.
+
+But a settlement rail is not a market. x402's flow is a single request → `402 Payment Required` → pay → retry, with the price set unilaterally by the server. It has no negotiation, no discovery of cheaper alternatives, no proof that the compute actually ran, and no escrow released only against a verified result. **That market-coordination layer is the gap ACMP fills.** ACMP does not compete with MCP, ARD, or x402 — it sits above the settlement rail and orchestrates the market on top of it.
+
+Concretely: x402 is one example of a rail that ACMP's [Layer 4 (Escrow & Settlement)](layers/04-escrow-settlement.md) can bind to for the actual movement of value. It is an example, not a requirement — per design principle **P4**, a non-blockchain settlement path is always also available, so ACMP never mandates any particular rail.
 
 ## 2. The Core Use Cases
 
@@ -135,6 +140,7 @@ An agent or its operator has unused inference capacity. It advertises this capac
 ## 4. What A2Agora Is Not
 
 - **Not a payment network.** ACMP defines the protocol for negotiation and settlement signaling. The actual movement of value (fiat, stablecoin, or CU token) is handled by a pluggable settlement layer (Layer 4).
+- **Not a replacement for settlement rails like x402.** ACMP sits *above* payment rails, not beside them. For simple metered access — a weather feed, a single database query — a rail like x402 on its own is sufficient and ACMP is overkill. ACMP earns its place only where a genuine *market* is needed: negotiation, discovery of cheaper providers, proof that the compute actually ran, and escrow released only against a verified result.
 - **Not a discovery protocol.** ACMP delegates capability discovery to existing standards like [ARD](https://agenticresourcediscovery.org). ACMP adds the economic layer — pricing, negotiation, settlement, and verification — on top of discovery.
 - **Not an agent framework.** ACMP does not define how agents are built, orchestrated, or prompted. It defines how they interact economically.
 - **Not a finished spec.** This is a living document. Sections marked `[OPEN]` are explicitly unresolved and invite contribution.
