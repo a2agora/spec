@@ -1,3 +1,8 @@
+---
+title: "Layer 5 — Discovery (ARD)"
+nav_order: 7
+---
+
 # Layer 5 — Discovery (ARD Binding)
 
 | Field | Value |

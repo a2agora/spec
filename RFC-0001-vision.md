@@ -1,3 +1,8 @@
+---
+title: "RFC-0001 — Vision"
+nav_order: 2
+---
+
 # RFC-0001: Vision & Problem Statement
 
 | Field | Value |

@@ -1,3 +1,8 @@
+---
+title: "Layer 6 — Negotiation"
+nav_order: 8
+---
+
 # Layer 6 — Negotiation Protocol
 
 | Field | Value |
