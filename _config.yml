@@ -1,0 +1,30 @@
+title: ACMP Specification
+description: >-
+  The Agent Compute Market Protocol (ACMP) — a layered open specification for
+  autonomous agent-to-agent compute trading.
+url: https://a2agora.org
+baseurl: "/spec"
+
+remote_theme: just-the-docs/just-the-docs
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+search_enabled: true
+heading_anchors: true
+color_scheme: light
+
+aux_links:
+  "a2agora.org":
+    - "https://a2agora.org"
+  "Reference SDK":
+    - "https://github.com/a2agora/sdk-reference"
+aux_links_new_tab: true
+
+exclude:
+  - specs/
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - LICENSE

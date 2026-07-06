@@ -1,3 +1,8 @@
+---
+title: "Layer 2 — Task Decomposition"
+nav_order: 4
+---
+
 # Layer 2 — Task Decomposition Format
 
 | Field | Value |

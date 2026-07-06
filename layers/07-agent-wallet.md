@@ -1,3 +1,8 @@
+---
+title: "Layer 7 — Wallet & Identity"
+nav_order: 9
+---
+
 # Layer 7 — Agent Wallet & Identity
 
 | Field | Value |
