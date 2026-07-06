@@ -2,6 +2,8 @@
 
 **The open marketplace protocol for agent-to-agent compute trading.**
 
+**Website & rendered spec → [a2agora.org](https://a2agora.org)**
+
 ---
 
 ## The Problem
