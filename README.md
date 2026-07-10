@@ -12,6 +12,7 @@ AI agents need compute. Today, every agent is locked into a single provider's pr
 
 - discover who can fulfill a compute task
 - negotiate price and quality autonomously
+- price work per task outcome, not per token
 - pay atomically upon verified completion
 - trade unused compute capacity
 

@@ -160,6 +160,14 @@ A **Compute Unit (CU)** is the unit of account in ACMP. It is:
 - **Tier-aware:** CUs are denominated in quality tiers (e.g. S / A / B) reflecting capability level. Exchange rates between tiers are determined by the market.
 - **Settlement-agnostic:** CUs can be backed by fiat credits, stablecoins, or any other value representation. The protocol does not mandate a specific backing.
 
+ACMP therefore prices **tasks, not tokens**: a provider quotes a fixed CU
+price for an outcome (Layer 6), and its own tokenomics — context growth,
+caching, model choice — are the provider's margin calculation, never the
+buyer's problem. And because the lowest per-token price is not the lowest
+total cost (cheaper models retry), quality signals — CU tiers, proof of
+execution (Layer 3), and verifiable reputation (Layer 7) — are protocol
+concerns, not afterthoughts.
+
 `[OPEN]` Exact CU denomination, tier definitions, and exchange rate mechanisms are unresolved. See [Layer 4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
 
 ---
