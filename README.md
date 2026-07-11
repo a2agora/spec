@@ -33,7 +33,7 @@ A Hermes agent short on budget at 3am finds an idle OpenClaw instance, negotiate
 | 3 | Proof of Execution | `discussion` |
 | 4 | Escrow & Settlement | `draft` |
 | 5 | Discovery ([→ ARD](https://agenticresourcediscovery.org)) | `external` |
-| 6 | Negotiation Protocol | `discussion` |
+| 6 | Negotiation Protocol | `draft` |
 | 7 | Agent Wallet & Identity | `draft` |
 
 Each layer is independently specifiable and implementable. You don't need to implement all seven to participate — a registry-only implementation is as valid a contribution as a full stack.
