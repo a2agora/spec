@@ -33,9 +33,10 @@ fan-out instead (§5).
 ## 1. Where Negotiation Sits
 
 ```
+L4:       escrowLock (buyer locks funds — typically before negotiating)
 L5/ARD:   discover candidates ──▶ [provider A, provider B, ...]
 L6:       offerRequest ──▶ offer ──▶ accept ──▶ ack        (this layer)
-L4:       escrowLock / escrowBind (buyer secures the funds)
+L4:       escrowBind (buyer binds the lock to the chosen provider)
 L1:       acmp/invoke (+ escrow_id) ──▶ result
 ```
 
