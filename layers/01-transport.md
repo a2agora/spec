@@ -155,6 +155,12 @@ Request from buyer to provider. Starts a compute task.
 
 Successful response to an `acmp/invoke` request.
 
+To be unambiguous about what a buyer receives: **`output` is the product
+being purchased** — the actual result data. `proof` is evidence *about* it
+(Layer 3), never a substitute. The only case where a result legitimately
+carries no `output` is a streamed task (§7.1), where the data has already
+arrived as chunks.
+
 ```json
 {
   "jsonrpc": "2.0",
