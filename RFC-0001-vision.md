@@ -186,7 +186,7 @@ concerns, not afterthoughts.
 └─────────────────────────────────────────────┘
 ```
 
-Lower layers are more foundational. Layer 1 (Transport) is the natural starting point for implementation. Layer 5 (Discovery) is delegated to the [ARD specification](https://agenticresourcediscovery.org); ACMP defines a binding that extends ARD entries with pricing and SLA metadata. Layer 3 (Proof of Execution) and Layer 6 (Negotiation) are the most novel and most in need of community input.
+Lower layers are more foundational. Layer 1 (Transport) is the natural starting point for implementation. Layer 5 (Discovery) is delegated to the [ARD specification](https://agenticresourcediscovery.org); ACMP defines a binding that extends ARD entries with pricing and SLA metadata. Layer 3 (Proof of Execution) and Layer 6 (Negotiation) are the most novel parts of the stack; with all layers now drafted, the single area most in need of community input is Layer 3's audit comparison regime (its §5, the determinism problem).
 
 ---
 

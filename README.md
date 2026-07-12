@@ -30,7 +30,7 @@ A Hermes agent short on budget at 3am finds an idle OpenClaw instance, negotiate
 |---|---|---|
 | 1 | Transport & Invocation | `draft` |
 | 2 | Task Decomposition Format | `draft` |
-| 3 | Proof of Execution | `discussion` |
+| 3 | Proof of Execution | `draft` |
 | 4 | Escrow & Settlement | `draft` |
 | 5 | Discovery ([→ ARD](https://agenticresourcediscovery.org)) | `external` |
 | 6 | Negotiation Protocol | `draft` |
