@@ -416,6 +416,17 @@ A plain **credit ledger** at the agent is a fully conforming rail: funding
 debits the buyer's account balance, payout credits the payee's. No chain, no
 token. This path MUST always remain implementable (RFC-0001 P4).
 
+A more powerful chain-free rail exists in **Chaumian blind-signature
+e-cash** (e.g. [GNU Taler](https://taler.net)): true bearer tokens with
+payer privacy and payee-side income transparency (AML/CFT-friendly),
+measured costs below USD 0.0001 per transaction, and settlement in a few
+hundred milliseconds — comfortably inside this layer's latency target (§6),
+and priced for exactly the micro-amounts CU trades involve. See Chaum,
+Grothoff & Moser, [*How to Issue a Central Bank Digital
+Currency*](https://ssrn.com/abstract=3965032) (SNB Working Paper, 2021) for
+the reference design. Like all rails here: a candidate binding, not a
+requirement.
+
 ### 7.3 x402 binding (informative)
 
 [x402](https://x402.org) is an HTTP-402 stablecoin rail with immediate,
