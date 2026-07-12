@@ -168,7 +168,7 @@ total cost (cheaper models retry), quality signals — CU tiers, proof of
 execution (Layer 3), and verifiable reputation (Layer 7) — are protocol
 concerns, not afterthoughts.
 
-`[OPEN]` Exact CU denomination, tier definitions, and exchange rate mechanisms are unresolved. See [Layer 4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
+`[OPEN]` Exact CU denomination, tier definitions, and exchange rate mechanisms are unresolved — as is the CU's technical representation: an account balance held with an escrow agent, or a true bearer instrument (e.g. Chaumian blind-signed e-cash, see Layer 4 §7.2). See [Layer 4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
 
 ---
 
