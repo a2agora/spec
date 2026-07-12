@@ -93,15 +93,27 @@ establishes, not what one wishes it did:
 | `tee-attestation` | **execution integrity** | The declared code ran unmodified inside genuine attested hardware on the given input. | That the code's *semantics* match the offer (attestation covers identity of code, not its quality). |
 
 The registry is **open**: new methods are added by defining their
-method-specific fields and guarantee level. Implementations MUST ignore
-unknown methods they did not negotiate rather than fail on them.
+method-specific fields and guarantee level. Precedence of the two handling
+rules: where a method **was negotiated**, §2's rejection rule prevails — a
+proof arriving with any other method is rejected. Only where **no** proof
+was negotiated MUST a verifier ignore (rather than fail on) an unsolicited
+proof with a method it does not know.
 
 ### 3.1 `result-hash`
 
 `hash` = `sha256:<hex>` over the [JCS (RFC 8785)](https://www.rfc-editor.org/rfc/rfc8785)
 canonicalization of the result's `output` object (`{type, data}`) — the
-same canonicalization Layer 7 uses for signature payloads. This is the
-floor method: cheap, universal, implemented by the
+same canonicalization Layer 7 uses for signature payloads. For **streamed**
+results (Layer 1 §7.1, where the result omits `output`), the provider
+hashes the complete output object it streamed; the buyer reassembles the
+chunks and verifies against the same object.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `hash` | string | yes | Commitment to the output. |
+| `input_hash` | string | no | `sha256:<hex>` over the JCS canonicalization of the task's `input` object. RECOMMENDED: it upgrades the commitment from *"I produced this output"* to *"I produced this output **from this input**"* — which is what a re-execution audit (§4.1) actually needs, and removes the "I was given different input" defense. |
+
+This is the floor method: cheap, universal, implemented by the
 [reference SDK](https://github.com/a2agora/sdk-reference), and honest about
 being *only* a commitment. Its value is downstream: a signed result-hash is
 exactly the evidence a Layer 4 dispute or an audit (§4) needs.
@@ -142,11 +154,14 @@ The settlement-side twin of this procedure already exists: Layer 4's
 **claim → challenge window → dispute** machinery. Layer 3 supplies what
 happens *inside* a dispute:
 
-1. The disputing party's evidence is the signed offer (Layer 6) and the
-   signed result + proof (Layer 1/3).
+1. The disputing party's evidence is the signed offer (Layer 6), the
+   signed result + proof (Layer 1/3), and the task input it re-supplies —
+   which is why the proof's `input_hash` (§3.1) matters: it lets the
+   auditor verify that the re-supplied input is the one the provider
+   originally committed to.
 2. An **Audit Executor** — a neutral party in the same spirit as Layer 4's
-   Escrow Agent role — re-executes the task from the recorded input under
-   the offer's terms.
+   Escrow Agent role — re-executes the task from that input under the
+   offer's terms.
 3. Its verdict (match / no-match / not-comparable) goes to the Escrow
    Agent, whose dispute resolution disburses accordingly (Layer 4 §4.6).
 
