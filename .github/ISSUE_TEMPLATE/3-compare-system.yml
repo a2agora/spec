@@ -1,0 +1,47 @@
+name: "Compare an existing system"
+description: "Explain how a prior system (Akash, Vast.ai, GNU Taler, x402, MCP, A2A, …) handles a problem a layer faces."
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ACMP doesn't invent in a vacuum. Grounding a design question in how an
+        existing system solved it — and what its trade-offs were — is one of the
+        most useful contributions. No new design required.
+  - type: input
+    id: system
+    attributes:
+      label: Which system?
+      placeholder: "e.g. GNU Taler, Akash Network, x402, A2A, Boltzmann/TEE attestation…"
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer does it inform?
+      options:
+        - "RFC-0001 (vision)"
+        - "Layer 1 — Transport & Invocation"
+        - "Layer 2 — Task Decomposition Format"
+        - "Layer 3 — Proof of Execution"
+        - "Layer 4 — Escrow & Settlement"
+        - "Layer 5 — Discovery (ARD)"
+        - "Layer 6 — Negotiation Protocol"
+        - "Layer 7 — Agent Wallet & Identity"
+        - "Cross-layer / other"
+    validations:
+      required: true
+  - type: textarea
+    id: mechanism
+    attributes:
+      label: How does it work?
+      description: How the system addresses the problem — its mechanism and its trade-offs.
+    validations:
+      required: true
+  - type: textarea
+    id: takeaway
+    attributes:
+      label: What can ACMP learn or reuse?
+      description: What's transferable, and what wouldn't fit ACMP's constraints (e.g. P4 — no required blockchain)?
+    validations:
+      required: false

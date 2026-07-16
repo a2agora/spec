@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Read the specification first
+    url: https://a2agora.org/spec
+    about: RFC-0001 and all seven layer documents — the fastest way to get oriented.
+  - name: Reference SDK
+    url: https://github.com/a2agora/sdk-reference
+    about: A runnable Python implementation of Layers 1, 2, and 6.
