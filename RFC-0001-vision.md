@@ -100,7 +100,7 @@ The infrastructure for autonomous agents is emerging in layers, each owned by a 
 └────────────────────┴────────────────────┴────────────────────┘
 ```
 
-ACMP builds on three substrates it does not own. MCP ([Agentic AI Foundation](https://aaif.io)) solves communication — how agents talk. ARD ([Microsoft, Google, Nvidia, et al.](https://agenticresourcediscovery.org)) solves discovery — how agents find capabilities. Settlement rails — most prominently **[x402](https://x402.org)** (open-sourced by Coinbase, now under the Linux Foundation with Visa, Mastercard, Google, Amazon, Stripe, and others) — solve *value movement*: how money actually flows once a price is agreed.
+ACMP builds on three substrates it does not own. MCP ([Agentic AI Foundation](https://aaif.io)) solves communication — how agents talk to tools (its horizontal sibling **A2A**, under the same foundation, covers agents talking to each other; how ACMP's transport relates to each is an open question, see §7). ARD ([Microsoft, Google, Nvidia, et al.](https://agenticresourcediscovery.org)) solves discovery — how agents find capabilities. Settlement rails — most prominently **[x402](https://x402.org)** (open-sourced by Coinbase, now under the Linux Foundation with Visa, Mastercard, Google, Amazon, Stripe, and others) — solve *value movement*: how money actually flows once a price is agreed.
 
 But a settlement rail is not a market. x402's flow is a single request → `402 Payment Required` → pay → retry, with the price set unilaterally by the server. It has no negotiation, no discovery of cheaper alternatives, no proof that the compute actually ran, and no escrow released only against a verified result. **That market-coordination layer is the gap ACMP fills.** ACMP does not compete with MCP, ARD, or x402 — it sits above the settlement rail and orchestrates the market on top of it.
 
@@ -198,7 +198,7 @@ This RFC intentionally leaves the following unresolved — they are the question
 2. **CU tier definitions** — who defines what "tier S" means, and how does the market prevent race-to-the-bottom on quality?
 3. **Regulatory framing** — is a CU a commodity, e-money, or a security under major jurisdictions (EU, US)?
 4. **Circuit breakers** — in an all-agent market operating at millisecond speed, what prevents flash crashes?
-5. **MCP extension path** — can Layer 1 be specified as an extension to MCP, or does it require a separate transport?
+5. **Transport substrate (MCP vs. A2A)** — Layer 1 is currently drafted as an MCP extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are peer agents — the *horizontal* shape that Google's A2A protocol targets (now under the same [Agentic AI Foundation](https://aaif.io) as MCP). Is A2A the more natural substrate, or should Layer 1 bind to both? Or is a standalone transport warranted?
 
 ---
 
