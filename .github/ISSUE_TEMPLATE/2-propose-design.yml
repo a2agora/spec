@@ -1,0 +1,47 @@
+name: "Propose a schema or design"
+description: "Propose a concrete message schema, data structure, or mechanism for a layer."
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Pick an `[OPEN]` point about a message format or mechanism and propose
+        something concrete. A pull request to the relevant layer document is
+        also welcome — issues don't need to be complete to be useful.
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer?
+      options:
+        - "RFC-0001 (vision)"
+        - "Layer 1 — Transport & Invocation"
+        - "Layer 2 — Task Decomposition Format"
+        - "Layer 3 — Proof of Execution"
+        - "Layer 4 — Escrow & Settlement"
+        - "Layer 5 — Discovery (ARD)"
+        - "Layer 6 — Negotiation Protocol"
+        - "Layer 7 — Agent Wallet & Identity"
+        - "Cross-layer / other"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What are you proposing?
+      description: The schema, field, message, or mechanism — concrete is better. Code blocks welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Trade-offs and alternatives
+      description: Why this shape? What did you consider and reject?
+    validations:
+      required: false
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact on other layers
+      description: Does this touch neighbouring layers (e.g. a term consumed elsewhere)?
+    validations:
+      required: false

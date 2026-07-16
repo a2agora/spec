@@ -1,0 +1,40 @@
+name: "Challenge an [OPEN] question"
+description: "Take on one of the spec's explicitly unresolved questions with your analysis."
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every layer document lists `[OPEN]` questions. You do **not** need a
+        definitive answer — a well-reasoned partial analysis is a mergeable
+        contribution. See [CONTRIBUTING](../blob/main/CONTRIBUTING.md).
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Which layer does this concern?
+      options:
+        - "RFC-0001 (vision)"
+        - "Layer 1 — Transport & Invocation"
+        - "Layer 2 — Task Decomposition Format"
+        - "Layer 3 — Proof of Execution"
+        - "Layer 4 — Escrow & Settlement"
+        - "Layer 5 — Discovery (ARD)"
+        - "Layer 6 — Negotiation Protocol"
+        - "Layer 7 — Agent Wallet & Identity"
+        - "Cross-layer / other"
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Which [OPEN] question?
+      description: Quote or paraphrase the open question you're addressing.
+    validations:
+      required: true
+  - type: textarea
+    id: analysis
+    attributes:
+      label: Your analysis
+      description: Reasoning, a proposed direction, trade-offs, references — partial is welcome.
+    validations:
+      required: true
