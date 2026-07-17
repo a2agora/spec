@@ -358,6 +358,15 @@ See §3 for the full DAG JSON. The orchestrator (buyer-side) executes it as foll
 
 - `[OPEN]` What is the maximum DAG depth/breadth? Should the protocol define limits to prevent resource exhaustion?
 - `[OPEN]` How are DAG-level pricing and billing aggregated — sum of all task costs, or a single escrow for the entire DAG? (Coordinated with Layer 4.)
+- `[OPEN]` **A `paused` task state.** The state machine above (§2) is
+  fire-and-execute: `pending → running → completed/failed/cancelled`, all
+  transitions one-way. Agent-in-the-loop clarification (a provider pausing to
+  ask the buyer a question, then resuming) would need a non-terminal `paused`
+  state that `running` can enter and leave. This is the Layer 2 half of the
+  Layer 1 resumable-interrupt question
+  ([Layer 1 Open Questions](01-transport.md#open-questions)); the two must
+  stay coherent, and the escrow consequence lives in
+  [Layer 4](04-escrow-settlement.md#open-questions).
 
 ---
 

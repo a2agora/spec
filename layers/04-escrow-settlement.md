@@ -470,6 +470,17 @@ instant-settlement rails with escrow-on-proof.
 - `[OPEN]` Partial completions of streaming tasks (Layer 1 §7 / Layer 2 §5):
   can a partial result justify a partial claim, and how is "how much was
   delivered" measured? Deferred until Layer 3 matures.
+- `[OPEN]` **Abandoned interrupts.** If Layer 1 gains resumable interrupts
+  ([L1 Open Questions](01-transport.md#open-questions),
+  [L2 Open Questions](02-task-format.md#open-questions)), a provider may pause
+  a task awaiting buyer input while the buyer never returns. The escrow
+  mechanics already exist — partial release (§4.3) and expiry auto-reclaim
+  (§2) — so the open part is the *trigger semantics*, not the plumbing: does
+  an interrupt carry its own `expires_in` window, does the task reach a
+  terminal `abandoned` state distinct from plain expiry, and is the provider
+  partially settled for compute spent up to the interrupt point (rather than
+  the buyer reclaiming everything)? Coupled to how "work done so far" is
+  measured, which tracks Layer 3.
 - `[OPEN]` Dispute arbitration: v0.1 leaves resolution to agent policy.
   Should a future version standardize an arbitration interface (e.g. a
   Layer 3 re-execution audit as neutral arbiter)?

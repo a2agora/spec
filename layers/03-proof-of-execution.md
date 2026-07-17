@@ -91,6 +91,7 @@ establishes, not what one wishes it did:
 |---|---|---|---|
 | `result-hash` | **commitment** | The provider is bound to exactly this output (non-repudiable when signed). | That any computation was performed to produce it. |
 | `tee-attestation` | **execution integrity** | The declared code ran unmodified inside genuine attested hardware on the given input. | That the code's *semantics* match the offer (attestation covers identity of code, not its quality). |
+| `embedded-challenge` | **input-awareness / anti-replay** | The responder saw *this specific input* (its nonce) while assembling the output — blind replay of a stored result fails. | That the output *body* was generated for this input (a cached body with a freshly computed marker passes), output quality, model identity, or that the agreed computation was performed. |
 
 The registry is **open**: new methods are added by defining their
 method-specific fields and guarantee level. Precedence of the two handling
@@ -140,6 +141,47 @@ hardware vendors, requires special fleets, and attests code identity, not
 output quality. TEE remains **optional**: per P4 and the pluggable
 registry, it is one binding, never a requirement. A full normative binding
 (report formats, verification flow, measurement policies) is `[OPEN]`.
+
+### 3.3 `embedded-challenge` (informative sketch)
+
+The two methods above are provider-attached. This one is **buyer-injected**:
+the buyer plants a novel, deterministically checkable constraint deep in the
+task input, then verifies its presence in the output in milliseconds —
+without re-execution and without any special hardware. A provider that
+returns a stored result *without reading the input* fails the check, because
+it could not have known the buyer's per-task constraint in advance.
+
+```json
+{
+  "method": "embedded-challenge",
+  "challenge_id": "chal_5f3a1b",
+  "binding": "output.footer",
+  "result_hash": "sha256:e3b0c442..."
+}
+```
+
+The challenge itself travels *inside* the task input (Layer 1 `input`), not
+in the proof — for example, an instruction to end the response with a value
+derived from a buyer-chosen nonce and specified material from the generated
+output. The buyer, holding the nonce, recomputes the expected marker and
+compares. `challenge_id` lets the buyer correlate; `binding` names where in
+the output the marker must appear; `result_hash` ties the whole thing to the
+committed output (§3.1) so the check cannot be replayed against a different
+result.
+
+This is an **input-awareness probe, not a work proof** — and its limit must
+be stated precisely: it defeats *blind* replay (returning a stored result
+without reading the input), but an adversary that reads the nonce can attach
+a freshly computed marker to a cached or cheaply produced body and still
+pass. It raises the cost of cheating from "return anything" to "at least
+process the input and run the marker construction", nothing more — so it
+says nothing about quality or model identity.
+Its natural role is a cheap complement to `result-hash` and to the
+spot-checking of §4.2, and it is the kind of method the open registry exists
+to accommodate. When used, it is negotiated like any other proof: requested
+via the Layer 6 `proof_method` term and gated by -33006 (§2), same as
+`result-hash` and `tee-attestation`. Which task shapes it generalizes to,
+and its precise construction, are `[OPEN]` (see Open Questions).
 
 ---
 
@@ -219,6 +261,7 @@ input, with this section as the docking point.
 | How are proof requirements expressed? | **Resolved by Layer 6:** the `proof_method` term, gated by -33006 at quote and invoke | The stub's question predated the Layer 6 draft. |
 | Who arbitrates the optimistic model? | **Audit Executor role inside Layer 4's existing dispute machinery** | Reuses the challenge-window mechanics that already exist; neutrality and economics stay `[OPEN]`. |
 | What does `result-hash` prove? | **Honestly: commitment only** | Overclaiming would be worse than a weak floor; its power comes from Layer 7 signatures + auditability. |
+| Anything cheap against blind replay? | **`embedded-challenge`: a buyer-injected input-awareness probe (§3.3)** | Catches blind replay in ms without re-execution or hardware; complements `result-hash` and spot-checks. Honest about its ceiling: proves the input was read, not that the work was done. |
 | Artifacts vs. procedures | **Separated (§3 vs §4)** | The stub mixed provider-attached proofs with market-side checking; the split makes guarantee levels statable. |
 | Determinism | **Stated precisely, not resolved** | Pretending bitwise re-execution works for AI would make the layer wrong; a precise problem statement invites the right contributors. |
 
@@ -233,6 +276,11 @@ input, with this section as the docking point.
   one, and who pays for re-execution (loser-pays, deposits, insurance)?
 - `[OPEN]` **Full TEE binding:** normative report formats and verification
   flows per runtime (SEV-SNP, TDX).
+- `[OPEN]` **`embedded-challenge` scope (§3.3):** which task shapes admit a
+  deterministically checkable buyer constraint (structured/tool-using outputs
+  fit readily; open-ended generation is harder), what the canonical challenge
+  construction and `binding` grammar are, and how to keep the injected
+  constraint from degrading the primary output.
 - `[OPEN]` **Spot-check economics:** audit rates, reputation computation,
   and cross-marketplace reputation portability (Layer 7 DIDs make it
   *attachable*; making it *comparable* is unsolved).

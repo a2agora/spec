@@ -446,7 +446,21 @@ If the buyer sends `acmp/cancel` during streaming (input or output), the provide
 
 ## Open Questions
 
-*No open questions remain for Layer 1 at this time.*
+- `[OPEN]` **Resumable interrupts (pause/resume).** Layer 1's seven message
+  types assume *fire-and-execute*: a provider completes, streams, or fails,
+  but never pauses mid-task to ask the buyer for something and resume. A2A
+  models exactly this with its `input-required` / `auth-required` states
+  ([A2A-MAPPING.md](../A2A-MAPPING.md#state-model-comparison) flags the gap).
+  A candidate remedy is two new notifications — `acmp/interrupt`
+  (provider → buyer, carrying a `reason` of `input_required` / `auth_required`
+  and a machine-readable schema of exactly what is needed) and `acmp/resume`
+  (buyer → provider, supplying it) — plus a non-terminal `paused` task state
+  (coordinated with [Layer 2 §2](02-task-format.md#2-task-states)). The
+  hardest part is economic, not syntactic: a paused task holds escrow while it
+  waits, so an interrupt needs an expiry after which the task is `abandoned`
+  and partially settled — a question owned by
+  [Layer 4](04-escrow-settlement.md#open-questions), not Layer 1. Left open
+  pending a cross-layer design; no wire change is made here.
 
 ---
 

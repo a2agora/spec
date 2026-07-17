@@ -224,6 +224,22 @@ This RFC intentionally leaves the following unresolved — they are the question
 
 1. **Proof of Execution without blockchain** — what is the minimal trust mechanism that doesn't require on-chain verification?
 2. **CU tier definitions** — who defines what "tier S" means, and how does the market prevent race-to-the-bottom on quality?
+
+   *One candidate answer raised in review* (not a decision): drop static S/A/B
+   tiers in favour of **verifiable capability claims**, with an independent
+   **Assessor** role — agents that maintain benchmark definitions, certify
+   providers, and that buyers choose to trust or not. Self-declaration is then
+   backed by **staking + slashing**: a provider stakes CU to claim a tier and
+   loses it if a [Layer 3](layers/03-proof-of-execution.md) audit shows a
+   degraded result. Two caveats keep this open rather than adopted. First,
+   parts of it already exist: hardware attestation is Layer 3's
+   `tee-attestation`, and continuous auditing plus reputation are Layer 3 §4.2
+   and [Layer 7](layers/07-agent-wallet.md) — an "Assessor" is largely those
+   two recombined into a named role. Second, staking/slashing pulls culturally
+   toward crypto-economic security, which sits in tension with the
+   non-blockchain positioning that is itself a selling point (§1, and P4).
+   Staking is implementable without a chain, so the friction is the
+   positioning, not the technique — a trade-off to weigh, not resolve here.
 3. **Regulatory framing** — is a CU a commodity, e-money, or a security under major jurisdictions (EU, US)?
 4. **Circuit breakers** — in an all-agent market operating at millisecond speed, what prevents flash crashes?
 5. **Transport substrate (MCP vs. A2A)** — Layer 1 is currently drafted as an MCP extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are peer agents — the *horizontal* shape that Google's [A2A](https://github.com/a2aproject/A2A) protocol targets (governed by the Linux Foundation, as is MCP's home the [Agentic AI Foundation](https://aaif.io)). Is A2A the more natural substrate, or should Layer 1 bind to both? Or is a standalone transport warranted? [A2A-MAPPING.md](A2A-MAPPING.md) works through a concrete message/state mapping and two candidate binding strategies — the question itself remains open.
