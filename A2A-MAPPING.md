@@ -60,10 +60,11 @@ and the canonical [`a2a.proto`](https://github.com/a2aproject/A2A) definition.
   `TaskArtifactUpdateEvent` on change, instead of the client polling.
 - **Extensibility:** an Agent Card can declare `extensions` — URIs
   identifying protocol extensions the agent supports. **[Agent Payments
-  Protocol (AP2)](https://github.com/google-agentic-commerce/ap2)** is a
-  real, shipped example: it extends A2A's task lifecycle with
-  payment-negotiation and settlement steps, declared as an extension URI —
-  see [AP2 precedent](#the-ap2-precedent) below.
+  Protocol (AP2)](https://ap2-protocol.org/)** is a real, shipped example:
+  it extends A2A's task lifecycle with a payment-*authorization* step —
+  cryptographically signed **Mandates** that prove genuine user intent —
+  declared as an extension URI. See [AP2 precedent](#the-ap2-precedent)
+  below.
 - **Identity:** A2A has **no protocol-level caller-identity field**.
   `role` on a `Message` is a direction marker (`user` vs. `agent`), not
   authentication. Callers are authenticated entirely at the transport layer
@@ -110,17 +111,25 @@ request/offer/accept round trip, but that happens entirely before
 ## The AP2 precedent
 
 A2A's own ecosystem has already solved a structurally similar problem: **AP2
-(Agent Payments Protocol)** adds payment negotiation and settlement to A2A's
-task lifecycle, declared as an extension URI in the Agent Card rather than
-forking or replacing A2A itself. This is not a blueprint ACMP could adopt
-verbatim — AP2 and ACMP make different design choices (AP2 is scoped to
-payment authorization; ACMP additionally covers compute-specific
-negotiation, escrow, and proof of execution) — but it is a concrete
-existence proof: **A2A's own community treats "layer an economic protocol
-on top of A2A as a declared extension" as an already-solved, shipping
+(Agent Payments Protocol)** adds a payment-authorization step — a chain of
+cryptographically signed Mandates (Checkout Mandate, Payment Mandate) — to
+A2A's task lifecycle, declared as an extension URI in the Agent Card rather
+than forking or replacing A2A itself. This is not a blueprint ACMP could
+adopt verbatim, and the difference is instructive: AP2 exists to prove an
+agent faithfully represents a *human* principal's intent, so its centre of
+gravity is the signed mandate. ACMP's buyer is itself an autonomous agent
+with its own wallet — there is no human-in-the-loop mandate to sign, and
+ACMP instead covers what AP2 does not: dynamic price negotiation (Layer 6),
+escrow, and proof of execution (Layer 3). What AP2 *does* establish is the
+part that matters here: **A2A's own community already treats "layer an
+economic protocol on top of A2A as a declared extension" as a shipping
 pattern**, not a hypothetical. That materially lowers the perceived risk of
-a hypothetical ACMP-on-A2A binding — the extension mechanism this would
-need already has a production precedent.
+an ACMP-on-A2A binding — the extension mechanism it would need has a
+production precedent. (Where a human principal *does* need to delegate
+purchasing authority to an ACMP buyer, AP2's mandates and ACMP's
+[Layer 7](layers/07-agent-wallet.md) spend limits address the same problem
+and are worth comparing directly — but that is a Layer 7 question, out of
+scope here.)
 
 ## Two binding strategies
 
@@ -137,11 +146,16 @@ different enough to name separately:
 
 Both are legitimate designs, not a forced choice — Principle P1 (layer
 independence) already means Layer 1 could support multiple bindings
-simultaneously. Our own assessment, offered as engineering judgment rather
-than a decision: the shallow strategy looks like the lower-risk entry
-point, precisely because it is the strategy that best serves P5
-(incremental adoptability) — it adds a binding without touching anything
-that already works. The deep strategy is the more *interesting* one
+simultaneously. That "one protocol, several transport bindings" idea is not
+speculative: the [Universal Commerce Protocol
+(UCP)](https://ucp.dev/documentation/core-concepts/) ships exactly it,
+exposing a single service over REST, MCP, A2A, and an embedded binding from
+one definition — a production precedent that dual-binding Layer 1 across MCP
+*and* A2A is architecturally normal, not exotic. Our own assessment of the
+two strategies, offered as engineering judgment rather than a decision: the
+shallow strategy looks like the lower-risk entry point, precisely because it
+is the strategy that best serves P5 (incremental adoptability) — it adds a
+binding without touching anything that already works. The deep strategy is the more *interesting* one
 long-term (it would let ACMP inherit A2A's `input-required` pause/resume
 for free, closing the gap noted above), but it is a substantially bigger
 undertaking that deserves its own dedicated design work if pursued.
@@ -276,7 +290,8 @@ pursue it.
 - [Layer 1 — Transport & Invocation](layers/01-transport.md) — the MCP binding this compares against
 - [Layer 6 — Negotiation Protocol](layers/06-negotiation-protocol.md) — the cross-layer note on `input-required`
 - [A2A Protocol](https://github.com/a2aproject/A2A) ([spec](https://a2a-protocol.org/latest/specification/))
-- [Agent Payments Protocol (AP2)](https://github.com/google-agentic-commerce/ap2) — the extension precedent
+- [Agent Payments Protocol (AP2)](https://ap2-protocol.org/) — the A2A extension precedent (payment authorization via Mandates)
+- [Universal Commerce Protocol (UCP)](https://ucp.dev/) — the multi-binding precedent (one service over REST/MCP/A2A/Embedded)
 
 ---
 
