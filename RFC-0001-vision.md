@@ -110,19 +110,20 @@ Concretely: x402 is one example of a rail that ACMP's [Layer 4 (Escrow & Settlem
 
 The three substrates above (MCP, ARD, settlement rails) sit *below* ACMP. A second cluster of protocols sits *beside* it — close enough to be mistaken for ACMP, but serving a different domain. The distinguishing axis is **who the principal is**: whether the economic actor is a human transacting through an agent, or an autonomous agent transacting on its own account.
 
-```mermaid
-flowchart TB
-    subgraph retail["Retail commerce · principal: a human"]
-        UCP["UCP · goods: catalog, cart, checkout, order"]
-        AP2["AP2 · payment authorization via signed Mandates"]
-    end
-    subgraph compute["Compute market · principal: the agent itself"]
-        ACMP["ACMP · negotiate (L6), proof (L3), escrow (L4)"]
-    end
-    sub["Shared substrates: transport (A2A / MCP), well-known discovery, settlement rails such as x402"]
-    UCP --> sub
-    AP2 --> sub
-    ACMP --> sub
+```
+┌─────────────────────────────────────┬─────────────────────────────────────┐
+│  Principal: a human                 │  Principal: the agent itself        │
+│                                     │                                     │
+│  UCP: catalog, cart, checkout       │  ACMP: negotiate (L6),              │
+│  AP2: payment auth (Mandates)       │        proof (L3), escrow (L4)      │
+│                                     │                                     │
+│  the "retail commerce" stack        │  the "compute market"               │
+└─────────────────────────────────────┴─────────────────────────────────────┘
+                   │                                     │
+                   ▼                                     ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│  Shared substrates: transport (A2A / MCP), discovery, rails (x402, ...)   │
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Protocol | Domain | Principal | Core concern | Where it meets ACMP |
