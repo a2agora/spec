@@ -15,6 +15,11 @@ search_enabled: true
 heading_anchors: true
 color_scheme: light
 
+# Render ```mermaid fenced blocks as diagrams (e.g. RFC-0001's "At a Glance"
+# sequence diagram). just-the-docs loads this version from jsDelivr.
+mermaid:
+  version: "11.16.0"
+
 aux_links:
   "a2agora.org":
     - "https://a2agora.org"
