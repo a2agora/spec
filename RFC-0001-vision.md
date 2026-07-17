@@ -198,7 +198,7 @@ This RFC intentionally leaves the following unresolved — they are the question
 2. **CU tier definitions** — who defines what "tier S" means, and how does the market prevent race-to-the-bottom on quality?
 3. **Regulatory framing** — is a CU a commodity, e-money, or a security under major jurisdictions (EU, US)?
 4. **Circuit breakers** — in an all-agent market operating at millisecond speed, what prevents flash crashes?
-5. **Transport substrate (MCP vs. A2A)** — Layer 1 is currently drafted as an MCP extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are peer agents — the *horizontal* shape that Google's [A2A](https://github.com/a2aproject/A2A) protocol targets (governed by the Linux Foundation, as is MCP's home the [Agentic AI Foundation](https://aaif.io)). Is A2A the more natural substrate, or should Layer 1 bind to both? Or is a standalone transport warranted?
+5. **Transport substrate (MCP vs. A2A)** — Layer 1 is currently drafted as an MCP extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are peer agents — the *horizontal* shape that Google's [A2A](https://github.com/a2aproject/A2A) protocol targets (governed by the Linux Foundation, as is MCP's home the [Agentic AI Foundation](https://aaif.io)). Is A2A the more natural substrate, or should Layer 1 bind to both? Or is a standalone transport warranted? [A2A-MAPPING.md](A2A-MAPPING.md) works through a concrete message/state mapping and two candidate binding strategies — the question itself remains open.
 
 ---
 

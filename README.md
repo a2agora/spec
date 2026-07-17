@@ -38,6 +38,8 @@ A Hermes agent short on budget at 3am finds an idle OpenClaw instance, negotiate
 
 Each layer is independently specifiable and implementable. You don't need to implement all seven to participate — a registry-only implementation is as valid a contribution as a full stack.
 
+Layer 1 is drafted as an MCP extension; [A2A-MAPPING.md](A2A-MAPPING.md) is an informative note comparing it against the [Agent2Agent Protocol (A2A)](https://github.com/a2aproject/A2A) as a candidate additional transport binding.
+
 ## Status
 
 This is a **pre-v0 specification**. Everything is open for discussion. The goal right now is not to get it right — it's to get it written down so we can argue about it properly.
