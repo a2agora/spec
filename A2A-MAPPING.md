@@ -35,9 +35,11 @@ Facts below are drawn from the [A2A specification](https://a2a-protocol.org/late
 and the canonical [`a2a.proto`](https://github.com/a2aproject/A2A) definition.
 
 - **Transport:** JSON-RPC 2.0 (baseline), gRPC, and REST — three bindings,
-  functionally equivalent wire semantics. Core RPCs: `SendMessage`,
-  `SendStreamingMessage` (SSE), `GetTask`, `ListTasks`, `CancelTask`,
-  `SubscribeToTask`.
+  functionally equivalent wire semantics. The JSON-RPC and gRPC bindings
+  share PascalCase method names; only REST differs (e.g. `POST
+  /message:send`). Core RPCs: `SendMessage`, `SendStreamingMessage` (SSE),
+  `GetTask`, `CancelTask`, `SubscribeToTask`, plus the
+  `*PushNotificationConfig` operations.
 - **Task state machine:** eight explicit states — `submitted`, `working`,
   `completed`, `failed`, `canceled`, `rejected`, `input-required`,
   `auth-required`.[^1] The first six are the "normal" lifecycle (four of
@@ -78,7 +80,7 @@ and the canonical [`a2a.proto`](https://github.com/a2aproject/A2A) definition.
 | `acmp/error` | provider → buyer | Task reaches `failed` (runtime error) or `rejected` (declined before starting) | ACMP's single error channel maps onto two distinct A2A terminal states. |
 | `acmp/streamChunk` | provider → buyer | `SendStreamingMessage` SSE stream / `TaskArtifactUpdateEvent` | — |
 | `acmp/heartbeat` | provider → buyer | **No clean equivalent** | A2A has no documented pure liveness-ping; see [Open Questions](#open-questions). |
-| `acmp/cancel` | buyer → provider | `CancelTask` | Direct, clean match. |
+| `acmp/cancel` | buyer → provider | `CancelTask` | Closest match, but the interaction differs: `acmp/cancel` is a fire-and-forget notification, `CancelTask` a request/response RPC that returns the updated task. |
 | `acmp/inputChunk` | buyer → provider | **No direct equivalent** | Closest A2A pattern is a follow-up `Message` on the same `task_id` after `input-required` — a discrete request/response exchange, not continuous chunk streaming. |
 
 ## State model comparison
@@ -261,12 +263,12 @@ sub-questions a future working group would need to close. Per Principle P1
 binding remains structurally available whenever the community is ready to
 pursue it.
 
-[^1]: Verified against the `a2a.proto` `TaskState` enum
-    (`TASK_STATE_SUBMITTED`, `TASK_STATE_WORKING`, ...). The lowercase
-    hyphenated forms used throughout this document are this document's own
-    readable rendering for comparison purposes, not independently confirmed
-    as the literal JSON-RPC/REST wire string values — check `a2a.proto` or
-    the JSON-RPC binding directly before treating them as normative.
+[^1]: The literal wire values are the `TaskState` enum constants —
+    `TASK_STATE_SUBMITTED`, `TASK_STATE_WORKING`, `TASK_STATE_INPUT_REQUIRED`,
+    and so on (§4.1.3 of the A2A spec; identical across the JSON-RPC and gRPC
+    bindings). The lowercase hyphenated forms used throughout this document
+    are a readable rendering for comparison only — use the `TASK_STATE_*`
+    constants when writing conformant code.
 
 ## Related
 
