@@ -106,6 +106,33 @@ But a settlement rail is not a market. x402's flow is a single request → `402 
 
 Concretely: x402 is one example of a rail that ACMP's [Layer 4 (Escrow & Settlement)](layers/04-escrow-settlement.md) can bind to for the actual movement of value. It is an example, not a requirement — per design principle **P4**, a non-blockchain settlement path is always also available, so ACMP never mandates any particular rail.
 
+### Neighboring commerce protocols: AP2 and UCP
+
+The three substrates above (MCP, ARD, settlement rails) sit *below* ACMP. A second cluster of protocols sits *beside* it — close enough to be mistaken for ACMP, but serving a different domain. The distinguishing axis is **who the principal is**: whether the economic actor is a human transacting through an agent, or an autonomous agent transacting on its own account.
+
+```mermaid
+flowchart TB
+    subgraph retail["Retail commerce · principal: a human"]
+        UCP["UCP · goods: catalog, cart, checkout, order"]
+        AP2["AP2 · payment authorization via signed Mandates"]
+    end
+    subgraph compute["Compute market · principal: the agent itself"]
+        ACMP["ACMP · negotiate (L6), proof (L3), escrow (L4)"]
+    end
+    sub["Shared substrates: transport (A2A / MCP), well-known discovery, settlement rails such as x402"]
+    UCP --> sub
+    AP2 --> sub
+    ACMP --> sub
+```
+
+| Protocol | Domain | Principal | Core concern | Where it meets ACMP |
+|---|---|---|---|---|
+| **[UCP](https://ucp.dev)** (Universal Commerce Protocol) | Retail commerce — goods | A human | Product catalog, cart, checkout, order | A multi-binding blueprint (one service exposed over REST / MCP / A2A / embedded); and a UCP merchant selling *compute* as a product could use ACMP as the richer backend for the parts a generic checkout omits. |
+| **[AP2](https://ap2-protocol.org)** (Agent Payments Protocol) | Payment authorization | A human | Cryptographically signed Mandates proving genuine user intent; an A2A extension | AP2's mandates and ACMP's [Layer 7](layers/07-agent-wallet.md) spend limits address the same "delegate purchasing authority" problem — the natural comparison point if a human principal ever backs an ACMP buyer. |
+| **ACMP** | Compute market | The agent itself | Dynamic negotiation, proof of execution, escrow released against proof | — |
+
+Because AP2 and UCP both centre on a *human* principal — AP2's whole purpose is proving an agent faithfully represents a person's intent — neither needs dynamic price negotiation or proof of execution. ACMP's parties are peer agents with their own wallets, which is exactly why those two capabilities ([Layer 6](layers/06-negotiation-protocol.md), [Layer 3](layers/03-proof-of-execution.md)) are central here and absent there. The relationship is complementary, not competitive: **ACMP is to compute trade what UCP and AP2 are to goods trade.** [A2A-MAPPING.md](A2A-MAPPING.md) works through AP2's A2A-extension mechanics in detail, as precedent for how an economic protocol layers onto A2A.
+
 ## 2. The Core Use Cases
 
 ### 2.1 Task Delegation

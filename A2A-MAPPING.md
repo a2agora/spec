@@ -287,6 +287,7 @@ pursue it.
 ## Related
 
 - [RFC-0001 §7](RFC-0001-vision.md) — the open question this document addresses
+- [RFC-0001 — Neighboring commerce protocols](RFC-0001-vision.md#neighboring-commerce-protocols-ap2-and-ucp) — the full three-way AP2 / UCP / ACMP positioning
 - [Layer 1 — Transport & Invocation](layers/01-transport.md) — the MCP binding this compares against
 - [Layer 6 — Negotiation Protocol](layers/06-negotiation-protocol.md) — the cross-layer note on `input-required`
 - [A2A Protocol](https://github.com/a2aproject/A2A) ([spec](https://a2a-protocol.org/latest/specification/))
