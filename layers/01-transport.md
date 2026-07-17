@@ -434,7 +434,7 @@ If the buyer sends `acmp/cancel` during streaming (input or output), the provide
 
 | Question | Decision | Rationale |
 |---|---|---|
-| MCP extension or standalone? | **MCP extension** | MCP is the emerging standard. Hermes, OpenClaw already speak it. No reason to reinvent transport. |
+| MCP extension or standalone? | **MCP extension (baseline)** | MCP is the emerging standard. Hermes, OpenClaw already speak it. No reason to reinvent transport. Baseline, not exclusive — see the additive [A2A binding](01-transport-a2a-binding.md). |
 | Authentication baseline? | **Bearer MUST, mTLS MAY** | A mandatory baseline guarantees any two agents share a common mechanism. mTLS adds connection-level auth for untrusted networks. |
 | Error code range? | **-33xxx** | Avoids collision with JSON-RPC reserved range (-32xxx). |
 | Batch invocation? | **No — use DAGs** | A DAG without edges is equivalent to a batch. One mechanism for both simple and complex cases (see Layer 2). |
@@ -466,6 +466,7 @@ If the buyer sends `acmp/cancel` during streaming (input or output), the provide
 
 ## Related
 
+- [Layer 1 — A2A Binding (shallow)](01-transport-a2a-binding.md) — the additive A2A binding for these same messages
 - [RFC-0001 §6](../RFC-0001-vision.md) — Protocol Stack Overview
 - [Layer 2 — Task Decomposition Format](02-task-format.md) — Task schema used in `acmp/invoke`
 - [Layer 5 — Discovery (ARD Binding)](05-discovery.md) — How endpoints are discovered
