@@ -14,8 +14,8 @@ nav_order: 10
 > **This document is informative, not normative.** It introduces no new
 > RFC 2119 requirements and does not change Layer 1. It exists to answer
 > [RFC-0001 §7, open question 5](RFC-0001-vision.md#7-open-questions) with a
-> grounded comparison rather than a bare link — the question itself
-> **remains open** by design; see [Conclusion](#conclusion).
+> grounded comparison rather than a bare link. **Update:** see
+> [Conclusion](#conclusion) for what this analysis has since resolved.
 
 ## Why this document exists
 
@@ -48,7 +48,7 @@ and the canonical [`a2a.proto`](https://github.com/a2aproject/A2A) definition.
 - **Message/Part model:** a `Message` carries `message_id`, `role`
   (`user`/`agent`), one or more `parts`, and optional `context_id`/`task_id`/
   `metadata`/`extensions`. A `Part` is one of `text`, `raw` (bytes), `url`,
-  or `data` (structured JSON) — each with optional `mime_type`.
+  or `data` (structured JSON) — each with optional `media_type`.
 - **Agent Card:** published at `/.well-known/agent-card.json`. Declares
   `name`, `description`, `version`, `supported_interfaces` (one entry per
   transport binding), `capabilities` (streaming/push/extensions feature
@@ -197,20 +197,24 @@ carried unchanged inside an A2A `SendMessage` call:
           "escrow_id": "esc_a3f9c2"
         }
       },
-      "mime_type": "application/acmp+json"
+      "media_type": "application/acmp+json"
     }
   ]
 }
 ```
 
 The provider would declare this binding the same way AP2 declares itself —
-an `acmp` extension URI in its Agent Card, analogous to Layer 1's existing
-`acmp` capability object in the MCP `initialize` handshake:
+an `acmp` extension in its Agent Card, analogous to Layer 1's existing
+`acmp` capability object in the MCP `initialize` handshake. Per the A2A
+spec, Agent Card extensions are `AgentExtension` objects (`uri`,
+`description`, `required`, `params`) inside `capabilities.extensions`:
 
 ```json
 {
-  "extensions": ["https://a2agora.org/acmp/v0.1"],
-  "capabilities": { "supports_streaming": true, "supports_extensions": true }
+  "capabilities": {
+    "streaming": true,
+    "extensions": [{ "uri": "https://a2agora.org/acmp/v0.1" }]
+  }
 }
 ```
 
@@ -244,20 +248,20 @@ that's a Layer 5 question, out of this document's scope.
 
 ## Open Questions
 
-- `[OPEN]` **`escrow_id`/`proof_method`/`max_price_cu` mapping:** if the
-  shallow binding were pursued, would these travel inside the `data` Part
-  (as sketched above) or as top-level `Message.metadata`? Metadata is
-  visible without parsing the ACMP payload, which may matter for A2A-native
-  routing/observability tooling, but duplicates data.
-- `[OPEN]` **Heartbeat/liveness equivalent:** A2A has no documented
-  pure liveness-ping. `TaskStatusUpdateEvent` repeated at `working` could
-  approximate it, but that requires the push-notification webhook
-  machinery to be configured, unlike ACMP's heartbeat which is a plain
-  notification on the existing connection.
-- `[OPEN]` **`acmp/inputChunk` equivalent:** does a genuinely streaming
-  input pipeline (Layer 2 §5) have *any* clean A2A expression, or is
-  chunked input streaming simply a capability ACMP has that A2A's
-  discrete-message model doesn't offer today?
+- **`escrow_id`/`proof_method`/`max_price_cu` mapping — Resolved.** These
+  fields stay inside the `data` Part (as sketched above), never hoisted to
+  `Message.metadata`. See [Layer 1 — A2A Binding
+  §3.1](layers/01-transport-a2a-binding.md#31-field-placement-escrow_id-proof_method-max_price_cu).
+- **Heartbeat/liveness equivalent — Resolved.** `acmp/heartbeat` travels like
+  `acmp/streamChunk`, as another `data`-Part message over the same streaming
+  channel — no push-notification webhook machinery required. See [Layer 1 —
+  A2A Binding
+  §3.2](layers/01-transport-a2a-binding.md#32-heartbeat--liveness).
+- **`acmp/inputChunk` equivalent — Resolved (declared unsupported).** The
+  shallow binding does not support input streaming; providers advertise
+  `input_streaming: false`. An honest gap rather than a forced fit. See
+  [Layer 1 — A2A Binding
+  §3.3](layers/01-transport-a2a-binding.md#33-input-streaming-acmpinputchunk).
 - `[OPEN]` **Negotiation via `input-required` (cross-layer note):** A2A's
   resumable-interrupt states could plausibly give Layer 6 (negotiation) a
   native "task paused, awaiting counter-offer" mechanism it doesn't have
@@ -267,15 +271,20 @@ that's a Layer 5 question, out of this document's scope.
 ## Conclusion
 
 RFC-0001 §7's question — *"Is A2A the more natural substrate, or should
-Layer 1 bind to both? Or is a standalone transport warranted?"* — **remains
-open.** What this document adds is not an answer but a grounded starting
-point: a concrete message mapping, a named precedent (AP2) that makes an
-A2A binding look architecturally plausible rather than speculative, two
-named strategies with different risk profiles, and four specific unresolved
-sub-questions a future working group would need to close. Per Principle P1
-(layer independence), nothing here requires choosing MCP *or* A2A — a dual
-binding remains structurally available whenever the community is ready to
-pursue it.
+Layer 1 bind to both? Or is a standalone transport warranted?"* — is now
+**answered for the shallow case**: Layer 1 binds to both. MCP remains the
+baseline; a shallow, additive A2A binding is specified in [Layer 1 — A2A
+Binding](layers/01-transport-a2a-binding.md), carrying ACMP's existing
+messages unchanged inside A2A `data` Parts. Three of the four sub-questions
+this document raised are resolved there; the fourth (negotiation via
+`input-required`) is a Layer 6 question and stays open.
+
+What **remains open** is the deep strategy — remodeling ACMP semantics
+natively onto A2A's task state machine. That is a substantially bigger
+undertaking, deliberately left as future work rather than folded into this
+first, lower-risk binding. Per Principle P1 (layer independence), Layer 1
+was never required to choose MCP *or* A2A; this is that dual binding, put
+into effect for the strategy that carried the lowest risk.
 
 [^1]: The literal wire values are the `TaskState` enum constants —
     `TASK_STATE_SUBMITTED`, `TASK_STATE_WORKING`, `TASK_STATE_INPUT_REQUIRED`,
@@ -288,6 +297,7 @@ pursue it.
 
 - [RFC-0001 §7](RFC-0001-vision.md) — the open question this document addresses
 - [RFC-0001 — Neighboring commerce protocols](RFC-0001-vision.md#neighboring-commerce-protocols-ap2-and-ucp) — the full three-way AP2 / UCP / ACMP positioning
+- [Layer 1 — A2A Binding (shallow)](layers/01-transport-a2a-binding.md) — the normative binding this analysis led to
 - [Layer 1 — Transport & Invocation](layers/01-transport.md) — the MCP binding this compares against
 - [Layer 6 — Negotiation Protocol](layers/06-negotiation-protocol.md) — the cross-layer note on `input-required`
 - [A2A Protocol](https://github.com/a2aproject/A2A) ([spec](https://a2a-protocol.org/latest/specification/))
