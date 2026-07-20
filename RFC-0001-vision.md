@@ -196,6 +196,27 @@ total cost (cheaper models retry), quality signals — CU tiers, proof of
 execution (Layer 3), and verifiable reputation (Layer 7) — are protocol
 concerns, not afterthoughts.
 
+The industry is converging on the same task-not-token framing: Salesforce's
+[**Agentic Work Unit (AWU)**](https://www.salesforce.com/news/stories/agentic-work-units/)
+— "one discrete task accomplished by an AI agent," introduced in early 2026
+explicitly *against* token consumption as a success metric — is a
+vendor-side sibling of the CU. Same parent idea (the unit is the completed
+task, not the compute behind it), but the two units live in different
+worlds:
+
+| | AWU (Salesforce) | CU (ACMP) |
+|---|---|---|
+| Defined by | a single vendor | the market, via an open protocol |
+| Purpose | internal success/reporting metric | tradable unit of account between unrelated agents |
+| What counts as a unit | the issuer decides, no outside audit | negotiated (Layer 6), tier-priced by the market |
+| Verification | none — a triggered workflow counts, correct or not | proof of execution (Layer 3) built in |
+
+The standard criticism of the AWU — it counts *execution*, not verified
+outcomes — is a cosmetic flaw for an in-house metric, but fatal for a market
+unit: no agent buys units whose delivery only the seller attests. That is
+why proof of execution (Layer 3) and market-defined tiers are built into the
+CU rather than bolted on.
+
 `[OPEN]` Exact CU denomination, tier definitions, and exchange rate mechanisms are unresolved — as is the CU's technical representation: an account balance held with an escrow agent, or a true bearer instrument (e.g. Chaumian blind-signed e-cash, see Layer 4 §7.2). See [Layer 4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
 
 ---
