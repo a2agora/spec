@@ -152,6 +152,8 @@ An agent acts as a broker: it receives a task, decomposes it into sub-tasks, rou
 
 An agent or its operator has unused inference capacity. It advertises this capacity via the registry with a price and SLA. Other agents consume it automatically. The operator earns CU tokens without any manual involvement.
 
+This use case grows with edge commoditization: near-frontier open-weight models now ship every few weeks, and unified-memory consumer hardware can serve them locally — so the supply side of a compute market is not just datacenters but a long tail of small, mutually unknown operators. Precisely that long tail is why proof of execution (Layer 3) and reputation (Layer 7) are protocol concerns: a market of strangers cannot run on curated provider lists.
+
 ---
 
 ## 3. Design Principles
