@@ -17,7 +17,10 @@ nav_order: 2
 
 ## Abstract
 
-This RFC describes the problem that A2Agora / ACMP aims to solve, the design principles guiding the protocol, and the intended scope of the specification. It does not define any protocol mechanics — those are addressed in layer-specific RFCs.
+This RFC describes the problem that A2Agora / ACMP aims to solve, the design
+principles guiding the protocol, and the intended scope of the specification.
+It does not define any protocol mechanics — those are addressed in
+layer-specific RFCs.
 
 ---
 
@@ -43,7 +46,8 @@ sequenceDiagram
     H->>E: Reclaim 0.002 CU (unused)
 ```
 
-> 847 transactions/second across the network — no human involvement in any individual trade.
+> 847 transactions/second across the network — no human involvement in any
+> individual trade.
 
 ---
 
@@ -70,21 +74,39 @@ sequenceDiagram
 
 ## 1. Motivation
 
-AI agents are becoming autonomous economic actors. They execute long-running tasks, delegate sub-tasks, consume compute resources, and in some architectures manage their own operational budgets. Yet the infrastructure for agent-to-agent economic interaction is almost entirely absent.
+AI agents are becoming autonomous economic actors. They execute long-running
+tasks, delegate sub-tasks, consume compute resources, and in some
+architectures manage their own operational budgets. Yet the infrastructure for
+agent-to-agent economic interaction is almost entirely absent.
 
 Today's landscape:
 
-- **Aggregators** (e.g. OpenRouter) solve multi-provider routing for humans via a unified fiat billing layer. There is no programmatic negotiation, no agent-native payment, no secondary market.
-- **GPU marketplaces** (e.g. Vast.ai) enable humans to buy/sell raw compute time. Transactions are human-initiated, fiat-settled, and not composable with agent workflows.
-- **Decentralized compute networks** (e.g. Akash, Render) solve parts of this problem but require blockchain infrastructure and crypto-native token mechanics, which introduces regulatory complexity and adoption friction.
+- **Aggregators** (e.g. OpenRouter) solve multi-provider routing for humans
+  via a unified fiat billing layer. There is no programmatic negotiation, no
+  agent-native payment, no secondary market.
+- **GPU marketplaces** (e.g. Vast.ai) enable humans to buy/sell raw compute
+  time. Transactions are human-initiated, fiat-settled, and not composable
+  with agent workflows.
+- **Decentralized compute networks** (e.g. Akash, Render) solve parts of this
+  problem but require blockchain infrastructure and crypto-native token
+  mechanics, which introduces regulatory complexity and adoption friction.
 
-None of these allow an agent to autonomously discover, negotiate, execute, verify, and pay for a compute task from another agent in a single composable workflow.
+None of these allow an agent to autonomously discover, negotiate, execute,
+verify, and pay for a compute task from another agent in a single composable
+workflow.
 
-- **Discovery specifications** (e.g. [ARD — Agentic Resource Discovery](https://agenticresourcediscovery.org), backed by Microsoft, Google, Nvidia, and others) are emerging to solve how agents find available capabilities. ARD answers *"what exists?"* — but not *"what does it cost, who is cheapest, was the job actually executed, and how do I pay?"* ACMP builds on discovery to add the economic layer that is missing.
+- **Discovery specifications** (e.g. [ARD — Agentic Resource
+  Discovery](https://agenticresourcediscovery.org), backed by Microsoft,
+  Google, Nvidia, and others) are emerging to solve how agents find available
+  capabilities. ARD answers *"what exists?"* — but not *"what does it cost,
+  who is cheapest, was the job actually executed, and how do I pay?"* ACMP
+  builds on discovery to add the economic layer that is missing.
 
 ### Where ACMP Fits in the Ecosystem
 
-The infrastructure for autonomous agents is emerging in layers, each owned by a different initiative. ACMP is the coordination layer on top: it orchestrates the layers below into a functioning market.
+The infrastructure for autonomous agents is emerging in layers, each owned by
+a different initiative. ACMP is the coordination layer on top: it orchestrates
+the layers below into a functioning market.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -100,15 +122,39 @@ The infrastructure for autonomous agents is emerging in layers, each owned by a 
 └────────────────────┴────────────────────┴────────────────────┘
 ```
 
-ACMP builds on three substrates it does not own. MCP ([Agentic AI Foundation](https://aaif.io)) solves communication — how agents talk to tools (its horizontal sibling **[A2A](https://github.com/a2aproject/A2A)**, Google's agent-to-agent protocol governed by the Linux Foundation, covers agents talking to each other; how ACMP's transport relates to each is an open question, see §7). ARD ([Microsoft, Google, Nvidia, et al.](https://agenticresourcediscovery.org)) solves discovery — how agents find capabilities. Settlement rails — most prominently **[x402](https://x402.org)** (open-sourced by Coinbase, now under the Linux Foundation with Visa, Mastercard, Google, Amazon, Stripe, and others) — solve *value movement*: how money actually flows once a price is agreed.
+ACMP builds on three substrates it does not own. MCP ([Agentic AI
+Foundation](https://aaif.io)) solves communication — how agents talk to tools
+(its horizontal sibling **[A2A](https://github.com/a2aproject/A2A)**, Google's
+agent-to-agent protocol governed by the Linux Foundation, covers agents
+talking to each other; how ACMP's transport relates to each is an open
+question, see §7). ARD ([Microsoft, Google, Nvidia, et
+al.](https://agenticresourcediscovery.org)) solves discovery — how agents find
+capabilities. Settlement rails — most prominently **[x402](https://x402.org)**
+(open-sourced by Coinbase, now under the Linux Foundation with Visa,
+Mastercard, Google, Amazon, Stripe, and others) — solve *value movement*: how
+money actually flows once a price is agreed.
 
-But a settlement rail is not a market. x402's flow is a single request → `402 Payment Required` → pay → retry, with the price set unilaterally by the server. It has no negotiation, no discovery of cheaper alternatives, no proof that the compute actually ran, and no escrow released only against a verified result. **That market-coordination layer is the gap ACMP fills.** ACMP does not compete with MCP, ARD, or x402 — it sits above the settlement rail and orchestrates the market on top of it.
+But a settlement rail is not a market. x402's flow is a single request → `402
+Payment Required` → pay → retry, with the price set unilaterally by the
+server. It has no negotiation, no discovery of cheaper alternatives, no proof
+that the compute actually ran, and no escrow released only against a verified
+result. **That market-coordination layer is the gap ACMP fills.** ACMP does
+not compete with MCP, ARD, or x402 — it sits above the settlement rail and
+orchestrates the market on top of it.
 
-Concretely: x402 is one example of a rail that ACMP's [Layer 4 (Escrow & Settlement)](layers/04-escrow-settlement.md) can bind to for the actual movement of value. It is an example, not a requirement — per design principle **P4**, a non-blockchain settlement path is always also available, so ACMP never mandates any particular rail.
+Concretely: x402 is one example of a rail that ACMP's [Layer 4 (Escrow &
+Settlement)](layers/04-escrow-settlement.md) can bind to for the actual
+movement of value. It is an example, not a requirement — per design principle
+**P4**, a non-blockchain settlement path is always also available, so ACMP
+never mandates any particular rail.
 
 ### Neighboring commerce protocols: AP2 and UCP
 
-The three substrates above (MCP, ARD, settlement rails) sit *below* ACMP. A second cluster of protocols sits *beside* it — close enough to be mistaken for ACMP, but serving a different domain. The distinguishing axis is **who the principal is**: whether the economic actor is a human transacting through an agent, or an autonomous agent transacting on its own account.
+The three substrates above (MCP, ARD, settlement rails) sit *below* ACMP. A
+second cluster of protocols sits *beside* it — close enough to be mistaken for
+ACMP, but serving a different domain. The distinguishing axis is **who the
+principal is**: whether the economic actor is a human transacting through an
+agent, or an autonomous agent transacting on its own account.
 
 ```
 ┌─────────────────────────────────────┬─────────────────────────────────────┐
@@ -132,53 +178,101 @@ The three substrates above (MCP, ARD, settlement rails) sit *below* ACMP. A seco
 | **[AP2](https://ap2-protocol.org)** (Agent Payments Protocol) | Payment authorization | A human | Cryptographically signed Mandates proving genuine user intent; an A2A extension | AP2's mandates and ACMP's [Layer 7](layers/07-agent-wallet.md) spend limits address the same "delegate purchasing authority" problem — the natural comparison point if a human principal ever backs an ACMP buyer. |
 | **ACMP** | Compute market | The agent itself | Dynamic negotiation, proof of execution, escrow released against proof | — |
 
-Because AP2 and UCP both centre on a *human* principal — AP2's whole purpose is proving an agent faithfully represents a person's intent — neither needs dynamic price negotiation or proof of execution. ACMP's parties are peer agents with their own wallets, which is exactly why those two capabilities ([Layer 6](layers/06-negotiation-protocol.md), [Layer 3](layers/03-proof-of-execution.md)) are central here and absent there. The relationship is complementary, not competitive: **ACMP is to compute trade what UCP and AP2 are to goods trade.** [A2A-MAPPING.md](A2A-MAPPING.md) works through AP2's A2A-extension mechanics in detail, as precedent for how an economic protocol layers onto A2A.
+Because AP2 and UCP both centre on a *human* principal — AP2's whole purpose
+is proving an agent faithfully represents a person's intent — neither needs
+dynamic price negotiation or proof of execution. ACMP's parties are peer
+agents with their own wallets, which is exactly why those two capabilities
+([Layer 6](layers/06-negotiation-protocol.md), [Layer
+3](layers/03-proof-of-execution.md)) are central here and absent there. The
+relationship is complementary, not competitive: **ACMP is to compute trade
+what UCP and AP2 are to goods trade.** [A2A-MAPPING.md](A2A-MAPPING.md) works
+through AP2's A2A-extension mechanics in detail, as precedent for how an
+economic protocol layers onto A2A.
 
 ## 2. The Core Use Cases
 
 ### 2.1 Task Delegation
 
-Agent A is executing a pipeline. One sub-task (e.g. sentiment analysis) is outside its capability or cheaper to outsource. Agent A queries a registry, receives offers from capable agents, selects the best price/quality tradeoff, and delegates — paying upon verified completion.
+Agent A is executing a pipeline. One sub-task (e.g. sentiment analysis) is
+outside its capability or cheaper to outsource. Agent A queries a registry,
+receives offers from capable agents, selects the best price/quality tradeoff,
+and delegates — paying upon verified completion.
 
 ### 2.2 Compute Arbitrage
 
-An orchestrator agent monitors the compute market. It purchases CU (Compute Units) when spot prices are low (e.g. nights, weekends) and redeems or resells them when demand is high. No human makes individual buy/sell decisions.
+An orchestrator agent monitors the compute market. It purchases CU (Compute
+Units) when spot prices are low (e.g. nights, weekends) and redeems or resells
+them when demand is high. No human makes individual buy/sell decisions.
 
 ### 2.3 Capability Brokering
 
-An agent acts as a broker: it receives a task, decomposes it into sub-tasks, routes each to the cheapest qualified agent, aggregates results, and returns a composed answer — keeping the margin between what it charges and what it pays.
+An agent acts as a broker: it receives a task, decomposes it into sub-tasks,
+routes each to the cheapest qualified agent, aggregates results, and returns a
+composed answer — keeping the margin between what it charges and what it pays.
 
 ### 2.4 Idle Capacity Monetization
 
-An agent or its operator has unused inference capacity. It advertises this capacity via the registry with a price and SLA. Other agents consume it automatically. The operator earns CU tokens without any manual involvement.
+An agent or its operator has unused inference capacity. It advertises this
+capacity via the registry with a price and SLA. Other agents consume it
+automatically. The operator earns CU tokens without any manual involvement.
 
-This use case grows with edge commoditization: near-frontier open-weight models now ship every few weeks, and unified-memory consumer hardware can serve them locally — so the supply side of a compute market is not just datacenters but a long tail of small, mutually unknown operators. Precisely that long tail is why proof of execution (Layer 3) and reputation (Layer 7) are protocol concerns: a market of strangers cannot run on curated provider lists.
+This use case grows with edge commoditization: near-frontier open-weight
+models now ship every few weeks, and unified-memory consumer hardware can
+serve them locally — so the supply side of a compute market is not just
+datacenters but a long tail of small, mutually unknown operators. Precisely
+that long tail is why proof of execution (Layer 3) and reputation (Layer 7)
+are protocol concerns: a market of strangers cannot run on curated provider
+lists.
 
 ---
 
 ## 3. Design Principles
 
-**P1 — Layer independence.** Each protocol layer must be specifiable and implementable in isolation. A partial implementation (e.g. registry-only, or negotiation-only) is a valid contribution to the ecosystem.
+**P1 — Layer independence.** Each protocol layer must be specifiable and
+implementable in isolation. A partial implementation (e.g. registry-only, or
+negotiation-only) is a valid contribution to the ecosystem.
 
-**P2 — Agent-native, not human-adapted.** The protocol is designed for machine-speed interactions (sub-100ms negotiation, atomic settlement). Human-facing concerns (dashboards, manual approvals) are out of scope for the protocol itself.
+**P2 — Agent-native, not human-adapted.** The protocol is designed for
+machine-speed interactions (sub-100ms negotiation, atomic settlement).
+Human-facing concerns (dashboards, manual approvals) are out of scope for the
+protocol itself.
 
-**P3 — Provider-agnostic.** The protocol does not assume any specific AI provider, model, or inference runtime. A CU represents a normalized unit of compute value, not a provider-specific token.
+**P3 — Provider-agnostic.** The protocol does not assume any specific AI
+provider, model, or inference runtime. A CU represents a normalized unit of
+compute value, not a provider-specific token.
 
-**P4 — No required blockchain.** The protocol must be implementable without blockchain or crypto infrastructure. Decentralized implementations are valid but not mandated. Trust mechanisms must have a non-blockchain path.
+**P4 — No required blockchain.** The protocol must be implementable without
+blockchain or crypto infrastructure. Decentralized implementations are valid
+but not mandated. Trust mechanisms must have a non-blockchain path.
 
-**P5 — Incremental adoptability.** An existing agent framework (LangChain, AutoGen, CrewAI) should be able to add ACMP support incrementally, starting from Layer 1, without restructuring its architecture.
+**P5 — Incremental adoptability.** An existing agent framework (LangChain,
+AutoGen, CrewAI) should be able to add ACMP support incrementally, starting
+from Layer 1, without restructuring its architecture.
 
-**P6 — Open governance.** No single company controls the spec. Decisions are made by working groups with open membership.
+**P6 — Open governance.** No single company controls the spec. Decisions are
+made by working groups with open membership.
 
 ---
 
 ## 4. What A2Agora Is Not
 
-- **Not a payment network.** ACMP defines the protocol for negotiation and settlement signaling. The actual movement of value (fiat, stablecoin, or CU token) is handled by a pluggable settlement layer (Layer 4).
-- **Not a replacement for settlement rails like x402.** ACMP sits *above* payment rails, not beside them. For simple metered access — a weather feed, a single database query — a rail like x402 on its own is sufficient and ACMP is overkill. ACMP earns its place only where a genuine *market* is needed: negotiation, discovery of cheaper providers, proof that the compute actually ran, and escrow released only against a verified result.
-- **Not a discovery protocol.** ACMP delegates capability discovery to existing standards like [ARD](https://agenticresourcediscovery.org). ACMP adds the economic layer — pricing, negotiation, settlement, and verification — on top of discovery.
-- **Not an agent framework.** ACMP does not define how agents are built, orchestrated, or prompted. It defines how they interact economically.
-- **Not a finished spec.** This is a living document. Sections marked `[OPEN]` are explicitly unresolved and invite contribution.
+- **Not a payment network.** ACMP defines the protocol for negotiation and
+  settlement signaling. The actual movement of value (fiat, stablecoin, or CU
+  token) is handled by a pluggable settlement layer (Layer 4).
+- **Not a replacement for settlement rails like x402.** ACMP sits *above*
+  payment rails, not beside them. For simple metered access — a weather feed,
+  a single database query — a rail like x402 on its own is sufficient and ACMP
+  is overkill. ACMP earns its place only where a genuine *market* is needed:
+  negotiation, discovery of cheaper providers, proof that the compute actually
+  ran, and escrow released only against a verified result.
+- **Not a discovery protocol.** ACMP delegates capability discovery to
+  existing standards like [ARD](https://agenticresourcediscovery.org). ACMP
+  adds the economic layer — pricing, negotiation, settlement, and verification
+  — on top of discovery.
+- **Not an agent framework.** ACMP does not define how agents are built,
+  orchestrated, or prompted. It defines how they interact economically.
+- **Not a finished spec.** This is a living document. Sections marked `[OPEN]`
+  are explicitly unresolved and invite contribution.
 
 ---
 
@@ -186,9 +280,14 @@ This use case grows with edge commoditization: near-frontier open-weight models 
 
 A **Compute Unit (CU)** is the unit of account in ACMP. It is:
 
-- **Normalized:** 1 CU represents an agreed unit of compute value, not a raw token count from any specific provider.
-- **Tier-aware:** CUs are denominated in quality tiers (e.g. S / A / B) reflecting capability level. Exchange rates between tiers are determined by the market.
-- **Settlement-agnostic:** CUs can be backed by fiat credits, stablecoins, or any other value representation. The protocol does not mandate a specific backing.
+- **Normalized:** 1 CU represents an agreed unit of compute value, not a raw
+  token count from any specific provider.
+- **Tier-aware:** CUs are denominated in quality tiers (e.g. S / A / B)
+  reflecting capability level. Exchange rates between tiers are determined by
+  the market.
+- **Settlement-agnostic:** CUs can be backed by fiat credits, stablecoins, or
+  any other value representation. The protocol does not mandate a specific
+  backing.
 
 ACMP therefore prices **tasks, not tokens**: a provider quotes a fixed CU
 price for an outcome (Layer 6), and its own tokenomics — context growth,
@@ -199,12 +298,12 @@ execution (Layer 3), and verifiable reputation (Layer 7) — are protocol
 concerns, not afterthoughts.
 
 The industry is converging on the same task-not-token framing: Salesforce's
-[**Agentic Work Unit (AWU)**](https://www.salesforce.com/news/stories/agentic-work-units/)
-— "one discrete task accomplished by an AI agent," introduced in early 2026
-explicitly *against* token consumption as a success metric — is a
-vendor-side sibling of the CU. Same parent idea (the unit is the completed
-task, not the compute behind it), but the two units live in different
-worlds:
+[**Agentic Work Unit
+(AWU)**](https://www.salesforce.com/news/stories/agentic-work-units/) — "one
+discrete task accomplished by an AI agent," introduced in early 2026
+explicitly *against* token consumption as a success metric — is a vendor-side
+sibling of the CU. Same parent idea (the unit is the completed task, not the
+compute behind it), but the two units live in different worlds:
 
 | | AWU (Salesforce) | CU (ACMP) |
 |---|---|---|
@@ -215,11 +314,15 @@ worlds:
 
 The standard criticism of the AWU — it counts *execution*, not verified
 outcomes — is a cosmetic flaw for an in-house metric, but fatal for a market
-unit: no agent buys units whose delivery only the seller attests. That is
-why proof of execution (Layer 3) and market-defined tiers are built into the
-CU rather than bolted on.
+unit: no agent buys units whose delivery only the seller attests. That is why
+proof of execution (Layer 3) and market-defined tiers are built into the CU
+rather than bolted on.
 
-`[OPEN]` Exact CU denomination, tier definitions, and exchange rate mechanisms are unresolved — as is the CU's technical representation: an account balance held with an escrow agent, or a true bearer instrument (e.g. Chaumian blind-signed e-cash, see Layer 4 §7.2). See [Layer 4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
+`[OPEN]` Exact CU denomination, tier definitions, and exchange rate mechanisms
+are unresolved — as is the CU's technical representation: an account balance
+held with an escrow agent, or a true bearer instrument (e.g. Chaumian
+blind-signed e-cash, see Layer 4 §7.2). See [Layer
+4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
 
 ---
 
@@ -237,16 +340,26 @@ CU rather than bolted on.
 └─────────────────────────────────────────────┘
 ```
 
-Lower layers are more foundational. Layer 1 (Transport) is the natural starting point for implementation. Layer 5 (Discovery) is delegated to the [ARD specification](https://agenticresourcediscovery.org); ACMP defines a binding that extends ARD entries with pricing and SLA metadata. Layer 3 (Proof of Execution) and Layer 6 (Negotiation) are the most novel parts of the stack; with every ACMP-owned layer now drafted, the single area most in need of community input is Layer 3's audit comparison regime (its §5, the determinism problem).
+Lower layers are more foundational. Layer 1 (Transport) is the natural
+starting point for implementation. Layer 5 (Discovery) is delegated to the
+[ARD specification](https://agenticresourcediscovery.org); ACMP defines a
+binding that extends ARD entries with pricing and SLA metadata. Layer 3 (Proof
+of Execution) and Layer 6 (Negotiation) are the most novel parts of the stack;
+with every ACMP-owned layer now drafted, the single area most in need of
+community input is Layer 3's audit comparison regime (its §5, the determinism
+problem).
 
 ---
 
 ## 7. Open Questions
 
-This RFC intentionally leaves the following unresolved — they are the questions we want the community to answer:
+This RFC intentionally leaves the following unresolved — they are the
+questions we want the community to answer:
 
-1. **Proof of Execution without blockchain** — what is the minimal trust mechanism that doesn't require on-chain verification?
-2. **CU tier definitions** — who defines what "tier S" means, and how does the market prevent race-to-the-bottom on quality?
+1. **Proof of Execution without blockchain** — what is the minimal trust
+   mechanism that doesn't require on-chain verification?
+2. **CU tier definitions** — who defines what "tier S" means, and how does the
+   market prevent race-to-the-bottom on quality?
 
    *One candidate answer raised in review* (not a decision): drop static S/A/B
    tiers in favour of **verifiable capability claims**, with an independent
@@ -263,9 +376,24 @@ This RFC intentionally leaves the following unresolved — they are the question
    non-blockchain positioning that is itself a selling point (§1, and P4).
    Staking is implementable without a chain, so the friction is the
    positioning, not the technique — a trade-off to weigh, not resolve here.
-3. **Regulatory framing** — is a CU a commodity, e-money, or a security under major jurisdictions (EU, US)?
-4. **Circuit breakers** — in an all-agent market operating at millisecond speed, what prevents flash crashes?
-5. **Transport substrate (MCP vs. A2A) — answered for the additive case, partially open for the native case.** Layer 1 is drafted as an MCP extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are peer agents — the *horizontal* shape that Google's [A2A](https://github.com/a2aproject/A2A) protocol targets (governed by the Linux Foundation, as is MCP's home the [Agentic AI Foundation](https://aaif.io)). [A2A-MAPPING.md](A2A-MAPPING.md) worked through a concrete message/state mapping and named two candidate binding strategies. The answer for the lower-risk one: **Layer 1 binds to both.** MCP stays the baseline, unchanged; a shallow, additive [A2A binding](layers/01-transport-a2a-binding.md) carries the same ACMP messages unmodified inside A2A `data` Parts. What remains open is the *deep* strategy — remodeling ACMP semantics natively onto A2A's task state machine, a substantially bigger undertaking left as explicit future work.
+3. **Regulatory framing** — is a CU a commodity, e-money, or a security under
+   major jurisdictions (EU, US)?
+4. **Circuit breakers** — in an all-agent market operating at millisecond
+   speed, what prevents flash crashes?
+5. **Transport substrate (MCP vs. A2A) — answered for the additive case,
+   partially open for the native case.** Layer 1 is drafted as an MCP
+   extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are
+   peer agents — the *horizontal* shape that Google's
+   [A2A](https://github.com/a2aproject/A2A) protocol targets (governed by the
+   Linux Foundation, as is MCP's home the [Agentic AI
+   Foundation](https://aaif.io)). [A2A-MAPPING.md](A2A-MAPPING.md) worked
+   through a concrete message/state mapping and named two candidate binding
+   strategies. The answer for the lower-risk one: **Layer 1 binds to both.**
+   MCP stays the baseline, unchanged; a shallow, additive [A2A
+   binding](layers/01-transport-a2a-binding.md) carries the same ACMP messages
+   unmodified inside A2A `data` Parts. What remains open is the *deep*
+   strategy — remodeling ACMP semantics natively onto A2A's task state
+   machine, a substantially bigger undertaking left as explicit future work.
 
 ---
 
@@ -275,8 +403,10 @@ This RFC intentionally leaves the following unresolved — they are the question
 - **Join a working group:** see [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Draft a layer spec:** copy the layer template in `layers/` and open a PR
 
-All perspectives welcome — protocol engineers, economists, security researchers, AI framework authors, and regulatory experts.
+All perspectives welcome — protocol engineers, economists, security
+researchers, AI framework authors, and regulatory experts.
 
 ---
 
-*This document is part of the A2Agora specification. Licensed under Apache 2.0.*
+*This document is part of the A2Agora specification. Licensed under Apache
+2.0.*

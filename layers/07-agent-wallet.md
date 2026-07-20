@@ -26,19 +26,19 @@ are interpreted as in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 ## 1. The Wallet
 
-The wallet is **operator-controlled middleware**, embeddable in existing
-agent frameworks (LangChain, AutoGen, CrewAI) as a plugin — not a required
-architectural change (RFC-0001 **P5**). It owns three things the agent
-process itself MUST NOT be able to override:
+The wallet is **operator-controlled middleware**, embeddable in existing agent
+frameworks (LangChain, AutoGen, CrewAI) as a plugin — not a required
+architectural change (RFC-0001 **P5**). It owns three things the agent process
+itself MUST NOT be able to override:
 
 1. **Keys** — the private keys behind the agent's economic identity live in
    the wallet, never in the agent's context or prompt. The agent *requests*
    signatures; it cannot exfiltrate the key material.
 2. **Spend limits** — enforced by the wallet *outside* the agent's reasoning
    loop (§6.2). This is the protocol's core safety primitive against the
-   *alignment-leak* risk (RFC-0001): an agent must not be able to spend
-   beyond its operator-defined budget regardless of its own reasoning, and
-   it MUST have no interface to raise its own limits.
+   *alignment-leak* risk (RFC-0001): an agent must not be able to spend beyond
+   its operator-defined budget regardless of its own reasoning, and it MUST
+   have no interface to raise its own limits.
 3. **The audit log** — append-only, operator-readable (§6.3).
 
 The wallet holds **CU credits**; it does not hold private keys to external
@@ -49,10 +49,10 @@ value (fiat, stablecoin). Redemption of CU happens via the settlement layer
 
 ## 2. Agent Identity: W3C DIDs
 
-An agent's economic identity is a
-[W3C Decentralized Identifier (DID)](https://www.w3.org/TR/did-core/): the
-wallet controls the private key, and the DID document publishes the public
-key(s) a counterparty needs for verification.
+An agent's economic identity is a [W3C Decentralized Identifier
+(DID)](https://www.w3.org/TR/did-core/): the wallet controls the private key,
+and the DID document publishes the public key(s) a counterparty needs for
+verification.
 
 ### 2.1 Method policy (P4)
 
@@ -60,16 +60,15 @@ key(s) a counterparty needs for verification.
   **chain-free method**: `did:web` (resolves over plain HTTPS — the natural
   choice for domain-anchored providers) or `did:key` (fully self-contained —
   the natural choice for buyers and ephemeral parties).
-- Verifiers MUST be able to resolve **both** `did:web` and `did:key`. This
-  is the interoperability baseline, mirroring Layer 1 §5's "Bearer is MUST"
-  rule.
+- Verifiers MUST be able to resolve **both** `did:web` and `did:key`. This is
+  the interoperability baseline, mirroring Layer 1 §5's "Bearer is MUST" rule.
 - Ledger-based methods (`did:ion`, `did:sov`, …) MAY be used *in addition* —
   never as the only identity. Per RFC-0001 **P4**, no blockchain is required.
 
 ### 2.2 Relationship to `provider_id`
 
-Layer 1 §4's `agent:<name>:<region>` identifier is **self-reported** and
-stays what it always was: a human-readable alias. The DID is authoritative:
+Layer 1 §4's `agent:<name>:<region>` identifier is **self-reported** and stays
+what it always was: a human-readable alias. The DID is authoritative:
 
 - An agent advertises its DID in the ACMP capability object:
 
@@ -88,27 +87,27 @@ stays what it always was: a human-readable alias. The DID is authoritative:
 
 - The DID document SHOULD list the alias (e.g. via `alsoKnownAs`), so the
   mapping is verifiable in both directions.
-- Where both are present, verifiers MUST treat the DID as the identity and
-  the alias as display metadata. Reputation attaches to the DID.
+- Where both are present, verifiers MUST treat the DID as the identity and the
+  alias as display metadata. Reputation attaches to the DID.
 
 ### 2.3 Custody: operator-provisioned, not self-generated
 
-The identity used for **economic operations** (anything that can move CU)
-MUST be provisioned by the operator into the wallet. Agents MAY self-generate
+The identity used for **economic operations** (anything that can move CU) MUST
+be provisioned by the operator into the wallet. Agents MAY self-generate
 ephemeral `did:key` identities for non-economic interactions (browsing,
 discovery), but a conforming wallet MUST NOT allow an identity the agent
 process generated *itself* to be bound to spendable funds. Note the rule is
-about **who provisioned the key, not the DID method**: an
-operator-provisioned `did:key` spends just fine (that is the normal buyer
-setup from §2.1). This resolves the operator-vs-self-generated question:
-*both exist, but only operator-provisioned keys spend.*
+about **who provisioned the key, not the DID method**: an operator-provisioned
+`did:key` spends just fine (that is the normal buyer setup from §2.1). This
+resolves the operator-vs-self-generated question: *both exist, but only
+operator-provisioned keys spend.*
 
 ### 2.4 Fleets
 
 One wallet MAY serve multiple agent instances. The DID identifies the
-**economic actor** (the operator's market persona), not the process
-instance: sub-agents of one wallet share its identity, its limits (§6.2)
-apply wallet-wide, and reputation accrues to the shared DID. Operators MAY
+**economic actor** (the operator's market persona), not the process instance:
+sub-agents of one wallet share its identity, its limits (§6.2) apply
+wallet-wide, and reputation accrues to the shared DID. Operators MAY
 additionally scope limits per instance; instance-level *identity* (sub-DIDs)
 is left `[OPEN]`.
 
@@ -116,10 +115,10 @@ is left `[OPEN]`.
 
 ## 3. Identity Verification: `acmp/proveIdentity`
 
-A challenge–response that upgrades a self-reported identity to a verified
-one. Either peer MAY challenge the other at any point after the MCP
-handshake; buyers SHOULD challenge providers before first payment, and an
-Escrow Agent SHOULD challenge a payee before first payout.
+A challenge–response that upgrades a self-reported identity to a verified one.
+Either peer MAY challenge the other at any point after the MCP handshake;
+buyers SHOULD challenge providers before first payment, and an Escrow Agent
+SHOULD challenge a payee before first payout.
 
 ```json
 {
@@ -136,8 +135,8 @@ Escrow Agent SHOULD challenge a payee before first payout.
 |---|---|---|---|
 | `nonce` | string | yes | Challenger-generated, single-use. Prevents replay. |
 
-**Result:** a signature envelope (§4) over the object
-`{ "nonce": "<the nonce>", "did": "<responder's did>" }`:
+**Result:** a signature envelope (§4) over the object `{ "nonce": "<the
+nonce>", "did": "<responder's did>" }`:
 
 ```json
 {
@@ -154,11 +153,11 @@ Escrow Agent SHOULD challenge a payee before first payout.
 
 The challenger resolves the DID document, locates `verification_method`,
 recomputes the payload hash, and verifies the signature. Crucially, the
-challenger MUST also check that `envelope.did` equals the DID it *expected*
-— the one the peer advertised in its capability object, or the bound
-`payee_id` in an escrow context. Without this check, any party with any
-valid DID could answer the challenge (a classic substitution attack).
-Failures use the -36xxx codes (§7).
+challenger MUST also check that `envelope.did` equals the DID it *expected* —
+the one the peer advertised in its capability object, or the bound `payee_id`
+in an escrow context. Without this check, any party with any valid DID could
+answer the challenge (a classic substitution attack). Failures use the -36xxx
+codes (§7).
 
 ---
 
@@ -176,8 +175,8 @@ A single, reusable structure for signing any ACMP JSON object:
 | `signature` | string | base64url signature over the payload hash. |
 
 The envelope rides in a `sig` field **added to** the object it covers; the
-signed object is the object *without* its `sig` field. Verification =
-resolve DID → check method → recompute JCS hash → verify signature.
+signed object is the object *without* its `sig` field. Verification = resolve
+DID → check method → recompute JCS hash → verify signature.
 
 ### 4.1 What must be signed
 
@@ -193,8 +192,8 @@ mandatory exactly where money makes disputes likely:
 | Any other message | MAY | — |
 
 The MUST rows apply **when the parties operate with DIDs** (i.e. Layer 7 is
-adopted): an Escrow Agent whose escrow is DID-bound MUST reject an unsigned
-or badly signed `escrowClaim` or `escrowDispute` with the appropriate -36xxx
+adopted): an Escrow Agent whose escrow is DID-bound MUST reject an unsigned or
+badly signed `escrowClaim` or `escrowDispute` with the appropriate -36xxx
 code. A Layer-4-only deployment without DIDs remains conforming (P5,
 incremental adoption) — its claims are simply weaker evidence in a dispute.
 
@@ -221,21 +220,21 @@ certification or CU quality tier:
 }
 ```
 
-*(The VC `proof` block is omitted above for brevity; on the wire it is
-present and verified per the VC Data Model.)*
+*(The VC `proof` block is omitted above for brevity; on the wire it is present
+and verified per the VC Data Model.)*
 
 Providers MAY attach VCs to Layer 6 offers and to their discovery entries
-(Layer 5 / ARD); buyers MAY require a tier VC before accepting an offer.
-**Who is trusted as an issuer** — a certification body, a marketplace
-operator, a web-of-trust — is an ecosystem question and remains `[OPEN]`.
+(Layer 5 / ARD); buyers MAY require a tier VC before accepting an offer. **Who
+is trusted as an issuer** — a certification body, a marketplace operator, a
+web-of-trust — is an ecosystem question and remains `[OPEN]`.
 
 ---
 
 ## 6. Wallet Interface
 
-The wallet interface is a **component contract, not a wire protocol** — it
-is what a framework plugin implements locally. Bindings per language are an
-SDK concern; the contract is:
+The wallet interface is a **component contract, not a wire protocol** — it is
+what a framework plugin implements locally. Bindings per language are an SDK
+concern; the contract is:
 
 ### 6.1 Balance
 
@@ -245,9 +244,8 @@ Tier exchange is a market function (RFC-0001 §5, `[OPEN]` there).
 ### 6.2 Spend authorization
 
 Every outbound economic operation (escrow lock, direct settlement) passes
-through `authorize(spend)` with
-`{ amount_cu, tier, counterparty_did, task_id }`. The operator MAY configure
-any of:
+through `authorize(spend)` with `{ amount_cu, tier, counterparty_did, task_id
+}`. The operator MAY configure any of:
 
 | Limit | Meaning |
 |---|---|
@@ -256,9 +254,9 @@ any of:
 | `per_task_max_cu` | Ceiling per individual task. |
 
 A spend is permitted only if **all configured limits pass (AND)**. This
-resolves the "how are limits expressed" question: all three forms, conjunctive.
-Denials MUST be visible to the operator (audit log), and the agent MUST NOT
-have any interface to modify limits.
+resolves the "how are limits expressed" question: all three forms,
+conjunctive. Denials MUST be visible to the operator (audit log), and the
+agent MUST NOT have any interface to modify limits.
 
 ### 6.3 Audit log
 
@@ -270,8 +268,8 @@ alias), `escrow_id`, `task_id`, `op_ref`, `outcome`.
 
 ### 6.4 Payout configuration
 
-The wallet publishes where its owner wants to be paid — this is what a
-Layer 4 Escrow Agent consults at payout time (Layer 4 §7.1):
+The wallet publishes where its owner wants to be paid — this is what a Layer 4
+Escrow Agent consults at payout time (Layer 4 §7.1):
 
 ```json
 {
@@ -283,8 +281,8 @@ Layer 4 Escrow Agent consults at payout time (Layer 4 §7.1):
 ```
 
 Order expresses preference; the payer selects the first mutually supported
-rail. At least one entry MUST use a non-blockchain rail or the
-credit-ledger path (**P4**).
+rail. At least one entry MUST use a non-blockchain rail or the credit-ledger
+path (**P4**).
 
 How this configuration reaches the payer is deployment-specific in v0.1:
 typically registered with the Escrow Agent out of band, or carried in the
@@ -296,16 +294,16 @@ first economic interaction. Standardizing an in-band field for it (e.g. on
 Before sending any mutating Layer 4 message, the wallet MUST durably record
 the `op_ref` and intent (write-ahead). After a crash, it re-queries
 `acmp/escrowStatus` and re-sends unresolved operations **with the same
-`op_ref`** — Layer 4 §3 idempotency guarantees this is safe. This resolves
-the "how does a wallet recover mid-escrow" question: recovery is a replay,
-never a guess.
+`op_ref`** — Layer 4 §3 idempotency guarantees this is safe. This resolves the
+"how does a wallet recover mid-escrow" question: recovery is a replay, never a
+guess.
 
 ---
 
 ## 7. Error Codes
 
-Identity and signature verification failures use the `-36xxx` range. They
-are **cross-cutting**: any ACMP endpoint that verifies identities (buyers,
+Identity and signature verification failures use the `-36xxx` range. They are
+**cross-cutting**: any ACMP endpoint that verifies identities (buyers,
 providers, Escrow Agents) MAY return them.
 
 | Code | Name | Description |
@@ -334,12 +332,12 @@ providers, Escrow Agents) MAY return them.
 
 ## Open Questions
 
-- `[OPEN]` **VC issuer trust:** who may issue capability/tier credentials,
-  and how do verifiers discover trustworthy issuers (trust registry,
-  marketplace policy, web of trust)?
+- `[OPEN]` **VC issuer trust:** who may issue capability/tier credentials, and
+  how do verifiers discover trustworthy issuers (trust registry, marketplace
+  policy, web of trust)?
 - `[OPEN]` **Key revocation latency:** DID documents support key rotation
-  natively, but how long may verifiers cache resolved documents before
-  a revoked key must stop verifying?
+  natively, but how long may verifiers cache resolved documents before a
+  revoked key must stop verifying?
 - `[OPEN]` **Per-instance identity in fleets:** should sub-agents be
   expressible as sub-DIDs / delegated keys of the wallet DID?
 
@@ -347,13 +345,19 @@ providers, Escrow Agents) MAY return them.
 
 ## Related
 
-- [RFC-0001 §5](../RFC-0001-vision.md) (CU token; tier economics stay open there)
-- [Layer 1 — Transport & Invocation](01-transport.md) (§4 self-reported `provider_id`, §5 connection auth — both upgraded, not replaced, by DIDs)
-- [Layer 3 — Proof of Execution](03-proof-of-execution.md) (signed results/proofs feed its verification models)
-- [Layer 4 — Escrow & Settlement](04-escrow-settlement.md) (§7.1 payout rail selection reads §6.4; claim/dispute evidence signing is MUST)
+- [RFC-0001 §5](../RFC-0001-vision.md) (CU token; tier economics stay open
+  there)
+- [Layer 1 — Transport & Invocation](01-transport.md) (§4 self-reported
+  `provider_id`, §5 connection auth — both upgraded, not replaced, by DIDs)
+- [Layer 3 — Proof of Execution](03-proof-of-execution.md) (signed
+  results/proofs feed its verification models)
+- [Layer 4 — Escrow & Settlement](04-escrow-settlement.md) (§7.1 payout rail
+  selection reads §6.4; claim/dispute evidence signing is MUST)
 - [Layer 6 — Negotiation Protocol](06-negotiation-protocol.md) (offer signing)
-- [W3C DID Core](https://www.w3.org/TR/did-core/) · [W3C VC Data Model 2.0](https://www.w3.org/TR/vc-data-model/)
+- [W3C DID Core](https://www.w3.org/TR/did-core/) · [W3C VC Data Model
+  2.0](https://www.w3.org/TR/vc-data-model/)
 
 ---
 
-*This document is part of the A2Agora specification. Licensed under Apache 2.0.*
+*This document is part of the A2Agora specification. Licensed under Apache
+2.0.*

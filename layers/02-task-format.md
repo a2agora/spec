@@ -13,15 +13,19 @@ nav_order: 4
 
 ## Scope
 
-A standard schema for describing compute tasks that can be decomposed into sub-tasks, routed independently, and reassembled into a composed result. This layer defines the data structures; Layer 1 defines how they are transmitted.
+A standard schema for describing compute tasks that can be decomposed into
+sub-tasks, routed independently, and reassembled into a composed result. This
+layer defines the data structures; Layer 1 defines how they are transmitted.
 
-The key words **MUST**, **SHOULD**, and **MAY** are interpreted as in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+The key words **MUST**, **SHOULD**, and **MAY** are interpreted as in [RFC
+2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 ---
 
 ## 1. Task Object
 
-A Task is the atomic unit of work in ACMP. Every `acmp/invoke` request carries exactly one Task in its `params`.
+A Task is the atomic unit of work in ACMP. Every `acmp/invoke` request carries
+exactly one Task in its `params`.
 
 ```json
 {
@@ -60,20 +64,26 @@ A Task is the atomic unit of work in ACMP. Every `acmp/invoke` request carries e
 
 A task's `input` is one of two shapes:
 
-- **Literal input** — concrete data, used when the task stands alone or is a DAG root:
+- **Literal input** — concrete data, used when the task stands alone or is a
+  DAG root:
   ```json
   { "type": "text", "data": "..." }
   ```
-- **Input reference** — a pointer to another task's output, used inside a DAG (see §3). The `source` key signals a reference, keeping it cleanly separate from the `type` taxonomy:
+- **Input reference** — a pointer to another task's output, used inside a DAG
+  (see §3). The `source` key signals a reference, keeping it cleanly separate
+  from the `type` taxonomy:
   ```json
   { "source": { "from_task": "task_split_01", "field": "data.chunks[0]" } }
   ```
 
-A literal input has a `type` and `data`; an input reference has a `source` and no `type` (the type is whatever the referenced output produces, resolved at runtime). The two forms are mutually exclusive.
+A literal input has a `type` and `data`; an input reference has a `source` and
+no `type` (the type is whatever the referenced output produces, resolved at
+runtime). The two forms are mutually exclusive.
 
 ### Input/Output Types
 
-The `type` field in a literal input and in `output_type` uses a simplified MIME-like taxonomy:
+The `type` field in a literal input and in `output_type` uses a simplified
+MIME-like taxonomy:
 
 | Type | Description | Example |
 |---|---|---|
@@ -84,7 +94,8 @@ The `type` field in a literal input and in `output_type` uses a simplified MIME-
 | `audio/wav` | WAV audio | Transcription tasks |
 | `binary` | Opaque binary | Provider-specific formats |
 
-Implementations SHOULD accept any string as `type` — the above are conventions, not an exhaustive list.
+Implementations SHOULD accept any string as `type` — the above are
+conventions, not an exhaustive list.
 
 ---
 
@@ -106,15 +117,22 @@ pending → running → completed
 | `failed` | Task failed. `acmp/error` was sent. |
 | `cancelled` | Task was cancelled via `acmp/cancel`. |
 
-State transitions are one-way. A `completed`, `failed`, or `cancelled` task is terminal.
+State transitions are one-way. A `completed`, `failed`, or `cancelled` task is
+terminal.
 
 ---
 
 ## 3. DAG Format
 
-For composite work, ACMP defines a Directed Acyclic Graph (DAG) format. A DAG decomposes a high-level job into sub-tasks with explicit data dependencies.
+For composite work, ACMP defines a Directed Acyclic Graph (DAG) format. A DAG
+decomposes a high-level job into sub-tasks with explicit data dependencies.
 
-> **The DAG is an orchestration plan, not a wire format.** There is no `acmp/invokeDag` message. The DAG is held and executed by the **buyer's orchestrator**, which walks the graph and emits one Layer 1 `acmp/invoke` per task — potentially to different providers. Providers never see the DAG; they only ever receive individual tasks. A DAG with an empty `edges` array is therefore simply a batch of independent tasks.
+> **The DAG is an orchestration plan, not a wire format.** There is no
+> `acmp/invokeDag` message. The DAG is held and executed by the **buyer's
+> orchestrator**, which walks the graph and emits one Layer 1 `acmp/invoke`
+> per task — potentially to different providers. Providers never see the
+> DAG; they only ever receive individual tasks. A DAG with an empty `edges`
+> array is therefore simply a batch of independent tasks.
 
 ```json
 {
@@ -181,19 +199,25 @@ For composite work, ACMP defines a Directed Acyclic Graph (DAG) format. A DAG de
 | `to` | string | yes | `task_id` of the downstream task. |
 | `stream_eligible` | boolean | no | If `true`, the downstream task may begin processing on partial output from `from`. Default: `false`. See §5. |
 
-> Conditional branching (running a downstream task only if some condition holds) is intentionally **not** part of the edge schema — see Design Decisions. An edge always represents an unconditional data dependency.
+> Conditional branching (running a downstream task only if some condition
+> holds) is intentionally **not** part of the edge schema — see Design
+> Decisions. An edge always represents an unconditional data dependency.
 
 ### DAG Constraints
 
 - The graph MUST be acyclic. An implementation MUST reject DAGs with cycles.
 - Every `task_id` referenced in `edges` MUST exist in the `tasks` array.
-- Every `from_task` / `from_tasks` referenced in an input `source` MUST correspond to an upstream edge into the referencing task.
-- Tasks with no incoming edges are **root tasks** — they start immediately with literal input.
-- Tasks with no outgoing edges are **leaf tasks** — their outputs form the DAG's result.
+- Every `from_task` / `from_tasks` referenced in an input `source` MUST
+  correspond to an upstream edge into the referencing task.
+- Tasks with no incoming edges are **root tasks** — they start immediately
+  with literal input.
+- Tasks with no outgoing edges are **leaf tasks** — their outputs form the
+  DAG's result.
 
 ### Input References
 
-When a task's input depends on another task's output, the input uses the `source` form (introduced in §1.1):
+When a task's input depends on another task's output, the input uses the
+`source` form (introduced in §1.1):
 
 ```json
 {
@@ -210,7 +234,10 @@ When a task's input depends on another task's output, the input uses the `source
 | `from_tasks` | array | Multiple task_ids (for aggregation inputs). The orchestrator passes their outputs as an ordered array. Mutually exclusive with `from_task`. |
 | `field` | string | Path into the referenced output. Optional — if absent, the entire `acmp/result` output object is passed. See path grammar below. |
 
-**Path grammar.** The `field` value is evaluated against the referenced task's full `acmp/result` `output` object (i.e. `{type, data}`). Therefore paths into the payload begin with `data`. Supported syntax (a deliberately small subset of JSONPath):
+**Path grammar.** The `field` value is evaluated against the referenced task's
+full `acmp/result` `output` object (i.e. `{type, data}`). Therefore paths into
+the payload begin with `data`. Supported syntax (a deliberately small subset
+of JSONPath):
 
 - `data` — the whole output payload
 - `data.foo` — object member access
@@ -218,9 +245,12 @@ When a task's input depends on another task's output, the input uses the `source
 - `data.items[0]` — array index access
 - `data.items[0].name` — combined
 
-Implementations MUST support this subset. Wildcards, slices, and filters are out of scope for v0.1.
+Implementations MUST support this subset. Wildcards, slices, and filters are
+out of scope for v0.1.
 
-The orchestrator resolves every `source` input into a concrete literal `{type, data}` before invoking the downstream task. The provider therefore always receives a literal input.
+The orchestrator resolves every `source` input into a concrete literal `{type,
+data}` before invoking the downstream task. The provider therefore always
+receives a literal input.
 
 ---
 
@@ -229,34 +259,57 @@ The orchestrator resolves every `source` input into a concrete literal `{type, d
 When a task in a DAG is cancelled:
 
 1. The cancelled task transitions to `cancelled` state.
-2. All downstream dependents (reachable via outgoing edges, BFS traversal) transition to `cancelled`.
-3. For each in-flight downstream task, the orchestrator sends `acmp/cancel` (Layer 1) to the relevant provider.
-4. Upstream tasks that are already `completed` are not affected — their results remain valid.
+2. All downstream dependents (reachable via outgoing edges, BFS traversal)
+   transition to `cancelled`.
+3. For each in-flight downstream task, the orchestrator sends `acmp/cancel`
+   (Layer 1) to the relevant provider.
+4. Upstream tasks that are already `completed` are not affected — their
+   results remain valid.
 
 When a task **fails**:
 
 1. The failed task transitions to `failed` state.
-2. Downstream dependents that cannot execute without the failed task's output transition to `cancelled`.
-3. Sibling tasks (tasks with no dependency on the failed task) continue executing unless the orchestrator decides to cancel the entire DAG.
+2. Downstream dependents that cannot execute without the failed task's output
+   transition to `cancelled`.
+3. Sibling tasks (tasks with no dependency on the failed task) continue
+   executing unless the orchestrator decides to cancel the entire DAG.
 
-The orchestrator chooses the failure policy: **fail-fast** (cancel entire DAG on first failure) or **best-effort** (continue independent branches). This is a configuration choice, not specified by the protocol.
+The orchestrator chooses the failure policy: **fail-fast** (cancel entire DAG
+on first failure) or **best-effort** (continue independent branches). This is
+a configuration choice, not specified by the protocol.
 
 ---
 
 ## 5. Streaming Within DAGs
 
-A DAG edge with `stream_eligible: true` allows the downstream task to begin processing before the upstream task completes. This is built entirely on Layer 1 streaming primitives:
+A DAG edge with `stream_eligible: true` allows the downstream task to begin
+processing before the upstream task completes. This is built entirely on Layer
+1 streaming primitives:
 
-1. The upstream task MUST be invoked with `stream: true` (Layer 1 §7.1), and its provider must have advertised `output_streaming`.
-2. The downstream task MUST be invoked with `input_stream: true` (Layer 1 §7.2), and its provider must have advertised `input_streaming`.
-3. As the orchestrator receives each `acmp/streamChunk` from the upstream provider, it forwards it as an `acmp/inputChunk` to the downstream provider.
-4. When the upstream sends its final chunk, the orchestrator sends a final `acmp/inputChunk` to the downstream.
+1. The upstream task MUST be invoked with `stream: true` (Layer 1 §7.1), and
+   its provider must have advertised `output_streaming`.
+2. The downstream task MUST be invoked with `input_stream: true` (Layer 1
+   §7.2), and its provider must have advertised `input_streaming`.
+3. As the orchestrator receives each `acmp/streamChunk` from the upstream
+   provider, it forwards it as an `acmp/inputChunk` to the downstream
+   provider.
+4. When the upstream sends its final chunk, the orchestrator sends a final
+   `acmp/inputChunk` to the downstream.
 
-**Field extraction does not apply to streamed edges.** A `field` path (e.g. `data.chunks[0]`) cannot be reliably evaluated against an incomplete JSON stream. Therefore an edge with `stream_eligible: true` MUST reference the whole upstream output — its `source` MUST omit `field` (or use `field: "data"`). If a `field` sub-selection is required, the edge cannot stream and MUST run in non-streaming mode regardless of `stream_eligible`.
+**Field extraction does not apply to streamed edges.** A `field` path (e.g.
+`data.chunks[0]`) cannot be reliably evaluated against an incomplete JSON
+stream. Therefore an edge with `stream_eligible: true` MUST reference the
+whole upstream output — its `source` MUST omit `field` (or use `field:
+"data"`). If a `field` sub-selection is required, the edge cannot stream and
+MUST run in non-streaming mode regardless of `stream_eligible`.
 
-If either provider lacks the required streaming feature, the orchestrator MUST fall back to non-streaming behaviour: wait for the upstream `acmp/result`, then invoke the downstream with literal input. `stream_eligible` is an optimization, never a correctness requirement.
+If either provider lacks the required streaming feature, the orchestrator MUST
+fall back to non-streaming behaviour: wait for the upstream `acmp/result`,
+then invoke the downstream with literal input. `stream_eligible` is an
+optimization, never a correctness requirement.
 
-If `stream_eligible` is `false` (default), the orchestrator always waits for the upstream task's `acmp/result` before invoking the downstream task.
+If `stream_eligible` is `false` (default), the orchestrator always waits for
+the upstream task's `acmp/result` before invoking the downstream task.
 
 ---
 
@@ -322,19 +375,25 @@ This matches the scenario from the RFC-0001 sequence diagram.
 
 ### 6.2 DAG: Text Decomposition Pipeline
 
-A buyer splits a long document into chunks, runs sentiment analysis on each chunk in parallel, then aggregates the results.
+A buyer splits a long document into chunks, runs sentiment analysis on each
+chunk in parallel, then aggregates the results.
 
 ```
 [text-split] → [sentiment-02a] → [aggregate]
              → [sentiment-02b] ↗
 ```
 
-See §3 for the full DAG JSON. The orchestrator (buyer-side) executes it as follows:
+See §3 for the full DAG JSON. The orchestrator (buyer-side) executes it as
+follows:
 
 1. Invokes `task_split_01` (root task) with literal input.
-2. On completion, resolves the `source` inputs for `task_sent_02a` and `task_sent_02b` — extracting `data.chunks[0]` and `data.chunks[1]` from the split result.
-3. Invokes both sentiment tasks in parallel via separate `acmp/invoke` calls (different providers allowed).
-4. On completion of both, resolves the `from_tasks` aggregation input for `task_agg_03`.
+2. On completion, resolves the `source` inputs for `task_sent_02a` and
+   `task_sent_02b` — extracting `data.chunks[0]` and `data.chunks[1]` from the
+   split result.
+3. Invokes both sentiment tasks in parallel via separate `acmp/invoke` calls
+   (different providers allowed).
+4. On completion of both, resolves the `from_tasks` aggregation input for
+   `task_agg_03`.
 5. Invokes the aggregation task.
 6. Returns `task_agg_03`'s output as the DAG result.
 
@@ -356,27 +415,34 @@ See §3 for the full DAG JSON. The orchestrator (buyer-side) executes it as foll
 
 ## Open Questions
 
-- `[OPEN]` What is the maximum DAG depth/breadth? Should the protocol define limits to prevent resource exhaustion?
-- `[OPEN]` How are DAG-level pricing and billing aggregated — sum of all task costs, or a single escrow for the entire DAG? (Coordinated with Layer 4.)
+- `[OPEN]` What is the maximum DAG depth/breadth? Should the protocol define
+  limits to prevent resource exhaustion?
+- `[OPEN]` How are DAG-level pricing and billing aggregated — sum of all task
+  costs, or a single escrow for the entire DAG? (Coordinated with Layer 4.)
 - `[OPEN]` **A `paused` task state.** The state machine above (§2) is
   fire-and-execute: `pending → running → completed/failed/cancelled`, all
   transitions one-way. Agent-in-the-loop clarification (a provider pausing to
   ask the buyer a question, then resuming) would need a non-terminal `paused`
   state that `running` can enter and leave. This is the Layer 2 half of the
-  Layer 1 resumable-interrupt question
-  ([Layer 1 Open Questions](01-transport.md#open-questions)); the two must
-  stay coherent, and the escrow consequence lives in
-  [Layer 4](04-escrow-settlement.md#open-questions).
+  Layer 1 resumable-interrupt question ([Layer 1 Open
+  Questions](01-transport.md#open-questions)); the two must stay coherent, and
+  the escrow consequence lives in [Layer
+  4](04-escrow-settlement.md#open-questions).
 
 ---
 
 ## Related
 
-- [RFC-0001 §2](../RFC-0001-vision.md) — Core Use Cases (Task Delegation, Capability Brokering)
-- [Layer 1 — Transport & Invocation](01-transport.md) — How tasks are transmitted
-- [Layer 3 — Proof of Execution](03-proof-of-execution.md) — How task results are verified
-- [Layer 6 — Negotiation Protocol](06-negotiation-protocol.md) — RFQ field naming conventions
+- [RFC-0001 §2](../RFC-0001-vision.md) — Core Use Cases (Task Delegation,
+  Capability Brokering)
+- [Layer 1 — Transport & Invocation](01-transport.md) — How tasks are
+  transmitted
+- [Layer 3 — Proof of Execution](03-proof-of-execution.md) — How task results
+  are verified
+- [Layer 6 — Negotiation Protocol](06-negotiation-protocol.md) — RFQ field
+  naming conventions
 
 ---
 
-*This document is part of the A2Agora specification. Licensed under Apache 2.0.*
+*This document is part of the A2Agora specification. Licensed under Apache
+2.0.*

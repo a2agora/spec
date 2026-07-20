@@ -13,28 +13,42 @@ nav_order: 3
 
 ## Scope
 
-Defines how agents invoke compute tasks on other agents and receive results. This layer is the foundation all other layers build on.
+Defines how agents invoke compute tasks on other agents and receive results.
+This layer is the foundation all other layers build on.
 
-ACMP is specified as an extension to the **Model Context Protocol (MCP)**. All ACMP messages are JSON-RPC 2.0 method calls and notifications transmitted over standard MCP connections.
+ACMP is specified as an extension to the **Model Context Protocol (MCP)**. All
+ACMP messages are JSON-RPC 2.0 method calls and notifications transmitted over
+standard MCP connections.
 
 ### Normative Language
 
-The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY**
+in this document are to be interpreted as described in [RFC
+2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 ### Relationship to Negotiation (Layer 6)
 
-`acmp/invoke` is the execution step. It is normally preceded by negotiation (Layer 6), in which buyer and provider agree on a price and terms. Two usage modes are valid:
+`acmp/invoke` is the execution step. It is normally preceded by negotiation
+(Layer 6), in which buyer and provider agree on a price and terms. Two usage
+modes are valid:
 
-- **Negotiated:** The buyer first runs a Layer 6 exchange, then sends `acmp/invoke` carrying the resulting `escrow_id`. The agreed price is bounded by `max_price_cu`.
-- **Direct (take-it-or-leave-it):** The buyer skips negotiation and sends `acmp/invoke` with a `max_price_cu`. The provider either executes at a price ≤ `max_price_cu` or rejects with `budget_exceeded` (-33001).
+- **Negotiated:** The buyer first runs a Layer 6 exchange, then sends
+  `acmp/invoke` carrying the resulting `escrow_id`. The agreed price is
+  bounded by `max_price_cu`.
+- **Direct (take-it-or-leave-it):** The buyer skips negotiation and sends
+  `acmp/invoke` with a `max_price_cu`. The provider either executes at a price
+  ≤ `max_price_cu` or rejects with `budget_exceeded` (-33001).
 
-In both modes, `max_price_cu` is the buyer's ceiling and the provider's reported `cost_cu` MUST NOT exceed it.
+In both modes, `max_price_cu` is the buyer's ceiling and the provider's
+reported `cost_cu` MUST NOT exceed it.
 
 ---
 
 ## 1. MCP Extension Model
 
-ACMP defines custom JSON-RPC 2.0 methods under the `acmp/` namespace. An ACMP-capable MCP server (the **provider**) advertises ACMP support in its capability object during the standard MCP `initialize` handshake:
+ACMP defines custom JSON-RPC 2.0 methods under the `acmp/` namespace. An
+ACMP-capable MCP server (the **provider**) advertises ACMP support in its
+capability object during the standard MCP `initialize` handshake:
 
 ```json
 {
@@ -54,33 +68,54 @@ ACMP defines custom JSON-RPC 2.0 methods under the `acmp/` namespace. An ACMP-ca
 }
 ```
 
-- `accepts` lists the inbound methods the provider handles (buyer → provider). A provider lists `acmp/inputChunk` only if `input_streaming` is `true`.
-- `emits` lists the outbound notifications the provider may send (provider → buyer). A provider lists `acmp/streamChunk` only if `output_streaming` is `true`, and `acmp/heartbeat` only if it sets `heartbeat_interval_ms`.
-- `features` advertises optional capabilities. A buyer MUST NOT rely on a feature the provider did not advertise. `heartbeat_interval_ms`, when present, is the nominal interval (in milliseconds) at which the provider emits heartbeats for running tasks; the buyer uses it to compute its liveness window (see §3.6).
+- `accepts` lists the inbound methods the provider handles (buyer → provider).
+  A provider lists `acmp/inputChunk` only if `input_streaming` is `true`.
+- `emits` lists the outbound notifications the provider may send (provider →
+  buyer). A provider lists `acmp/streamChunk` only if `output_streaming` is
+  `true`, and `acmp/heartbeat` only if it sets `heartbeat_interval_ms`.
+- `features` advertises optional capabilities. A buyer MUST NOT rely on a
+  feature the provider did not advertise. `heartbeat_interval_ms`, when
+  present, is the nominal interval (in milliseconds) at which the provider
+  emits heartbeats for running tasks; the buyer uses it to compute its
+  liveness window (see §3.6).
 
-If the `acmp` capability is absent, the server is a regular MCP server with no ACMP support.
+If the `acmp` capability is absent, the server is a regular MCP server with no
+ACMP support.
 
 ### Why MCP
 
-- MCP is the emerging standard for agent-to-tool and agent-to-agent communication (AAIF governance).
+- MCP is the emerging standard for agent-to-tool and agent-to-agent
+  communication (AAIF governance).
 - Hermes, OpenClaw, and other major agent frameworks already speak MCP.
-- JSON-RPC 2.0 provides request/response correlation, error codes, and notification semantics out of the box.
-- ACMP adds economic semantics (pricing, proofs, escrow) — it does not reinvent transport.
+- JSON-RPC 2.0 provides request/response correlation, error codes, and
+  notification semantics out of the box.
+- ACMP adds economic semantics (pricing, proofs, escrow) — it does not
+  reinvent transport.
 
 ### Transport Requirements
 
-Several ACMP messages are **provider-initiated notifications** (`acmp/streamChunk`, `acmp/heartbeat`). These require a transport that supports server-to-client messages. ACMP therefore requires a **bidirectional transport**:
+Several ACMP messages are **provider-initiated notifications**
+(`acmp/streamChunk`, `acmp/heartbeat`). These require a transport that
+supports server-to-client messages. ACMP therefore requires a **bidirectional
+transport**:
 
-- **Supported:** HTTP+SSE, Streamable HTTP, stdio (all allow server→client messages).
-- **Not supported:** plain request/response HTTP without a server-push channel.
+- **Supported:** HTTP+SSE, Streamable HTTP, stdio (all allow server→client
+  messages).
+- **Not supported:** plain request/response HTTP without a server-push
+  channel.
 
-A provider that can only use a non-bidirectional transport MUST advertise `output_streaming: false` and MUST NOT emit notifications; buyers fall back to a single `acmp/result`.
+A provider that can only use a non-bidirectional transport MUST advertise
+`output_streaming: false` and MUST NOT emit notifications; buyers fall back to
+a single `acmp/result`.
 
 ---
 
 ## 2. Message Types
 
-ACMP defines seven message types. Each is either a JSON-RPC **request** (expects a response) or a **notification** (fire-and-forget). Notifications correlate to a task via the `task_id` field in their `params`, since notifications have no JSON-RPC `id`.
+ACMP defines seven message types. Each is either a JSON-RPC **request**
+(expects a response) or a **notification** (fire-and-forget). Notifications
+correlate to a task via the `task_id` field in their `params`, since
+notifications have no JSON-RPC `id`.
 
 | Method | Direction | JSON-RPC Type | Purpose |
 |---|---|---|---|
@@ -149,17 +184,22 @@ Request from buyer to provider. Starts a compute task.
 
 #### 3.1.1 Idempotency & Retries
 
-`task_id` is buyer-generated and MUST be globally unique. It serves as an **idempotency key**: if a provider receives a second `acmp/invoke` with a `task_id` it has already seen, it MUST NOT execute the task again. Instead it SHOULD return the existing result (if completed) or treat the duplicate as a no-op (if still running). This makes `acmp/invoke` safe to retry after a network failure without risk of double execution or double billing.
+`task_id` is buyer-generated and MUST be globally unique. It serves as an
+**idempotency key**: if a provider receives a second `acmp/invoke` with a
+`task_id` it has already seen, it MUST NOT execute the task again. Instead it
+SHOULD return the existing result (if completed) or treat the duplicate as a
+no-op (if still running). This makes `acmp/invoke` safe to retry after a
+network failure without risk of double execution or double billing.
 
 ### 3.2 `acmp/result`
 
 Successful response to an `acmp/invoke` request.
 
-To be unambiguous about what a buyer receives: **`output` is the product
-being purchased** — the actual result data. `proof` is evidence *about* it
-(Layer 3), never a substitute. The only case where a result legitimately
-carries no `output` is a streamed task (§7.1), where the data has already
-arrived as chunks.
+To be unambiguous about what a buyer receives: **`output` is the product being
+purchased** — the actual result data. `proof` is evidence *about* it (Layer
+3), never a substitute. The only case where a result legitimately carries no
+`output` is a streamed task (§7.1), where the data has already arrived as
+chunks.
 
 ```json
 {
@@ -198,7 +238,8 @@ arrived as chunks.
 
 ### 3.3 `acmp/error`
 
-Error response to an `acmp/invoke` request. Uses standard JSON-RPC 2.0 error format with ACMP-specific codes.
+Error response to an `acmp/invoke` request. Uses standard JSON-RPC 2.0 error
+format with ACMP-specific codes.
 
 ```json
 {
@@ -229,11 +270,15 @@ Error response to an `acmp/invoke` request. Uses standard JSON-RPC 2.0 error for
 | -33007 | `feature_unsupported` | A requested feature (e.g. input/output streaming) was not advertised. |
 | -33099 | `internal` | Unspecified provider-side error. |
 
-Error codes are in the `-33xxx` range to avoid collision with standard JSON-RPC codes (-32xxx) and leave room for application-specific codes.
+Error codes are in the `-33xxx` range to avoid collision with standard
+JSON-RPC codes (-32xxx) and leave room for application-specific codes.
 
 ### 3.4 `acmp/inputChunk`
 
-JSON-RPC notification (buyer → provider). Used when the buyer set `input_stream: true` in `acmp/invoke` to deliver the input incrementally. This is the input-side counterpart to `acmp/streamChunk` and is what makes streaming pipelines (Layer 2 §5) possible.
+JSON-RPC notification (buyer → provider). Used when the buyer set
+`input_stream: true` in `acmp/invoke` to deliver the input incrementally. This
+is the input-side counterpart to `acmp/streamChunk` and is what makes
+streaming pipelines (Layer 2 §5) possible.
 
 ```json
 {
@@ -258,11 +303,14 @@ JSON-RPC notification (buyer → provider). Used when the buyer set `input_strea
 | `chunk` | object | `{type, data}` — partial input payload. |
 | `final` | boolean | If `true`, this is the last input chunk; the provider has received the complete input. |
 
-The provider MUST process chunks in `seq` order. It MUST NOT send `acmp/result` before receiving a chunk with `final: true` (unless it fails or is cancelled).
+The provider MUST process chunks in `seq` order. It MUST NOT send
+`acmp/result` before receiving a chunk with `final: true` (unless it fails or
+is cancelled).
 
 ### 3.5 `acmp/streamChunk`
 
-JSON-RPC notification (provider → buyer). Sent when the buyer set `stream: true` in `acmp/invoke`.
+JSON-RPC notification (provider → buyer). Sent when the buyer set `stream:
+true` in `acmp/invoke`.
 
 ```json
 {
@@ -289,7 +337,8 @@ JSON-RPC notification (provider → buyer). Sent when the buyer set `stream: tru
 
 ### 3.6 `acmp/heartbeat`
 
-JSON-RPC notification (provider → buyer). Signals that a long-running task is still being processed.
+JSON-RPC notification (provider → buyer). Signals that a long-running task is
+still being processed.
 
 ```json
 {
@@ -309,7 +358,17 @@ JSON-RPC notification (provider → buyer). Signals that a long-running task is 
 | `progress` | number | no | Estimated progress as a fraction between 0.0 and 1.0. |
 | `detail` | string | no | Human-readable status message. |
 
-**Timeout vs. liveness.** `timeout_ms` is always a hard wall-clock deadline: if no `acmp/result` arrives within it, the buyer fails the task with -33003, regardless of heartbeats. Heartbeats do **not** extend this deadline. Their purpose is the opposite — to let a buyer **fail fast**: if a provider advertised a `heartbeat_interval_ms` (see §1) and the buyer stops receiving heartbeats for longer than its liveness window (recommended: 3× `heartbeat_interval_ms`), the buyer MAY conclude the provider has died and fail the task early with -33003, reclaiming escrow without waiting for the full `timeout_ms`. For legitimately long tasks, the buyer sets a generous `timeout_ms`; heartbeats give it confidence the task is progressing rather than hung.
+**Timeout vs. liveness.** `timeout_ms` is always a hard wall-clock deadline:
+if no `acmp/result` arrives within it, the buyer fails the task with -33003,
+regardless of heartbeats. Heartbeats do **not** extend this deadline. Their
+purpose is the opposite — to let a buyer **fail fast**: if a provider
+advertised a `heartbeat_interval_ms` (see §1) and the buyer stops receiving
+heartbeats for longer than its liveness window (recommended: 3×
+`heartbeat_interval_ms`), the buyer MAY conclude the provider has died and
+fail the task early with -33003, reclaiming escrow without waiting for the
+full `timeout_ms`. For legitimately long tasks, the buyer sets a generous
+`timeout_ms`; heartbeats give it confidence the task is progressing rather
+than hung.
 
 ### 3.7 `acmp/cancel`
 
@@ -331,13 +390,18 @@ JSON-RPC notification sent by the buyer to cancel a running task.
 | `task_id` | string | yes | The task to cancel. |
 | `reason` | string | no | Human-readable cancellation reason. |
 
-Upon receiving `acmp/cancel`, the provider SHOULD stop work as soon as practical and respond to the original `acmp/invoke` with an `acmp/error` using code -33004 (cancelled). Partial work MAY still be billed — the exact policy is defined by the negotiation terms (Layer 6).
+Upon receiving `acmp/cancel`, the provider SHOULD stop work as soon as
+practical and respond to the original `acmp/invoke` with an `acmp/error` using
+code -33004 (cancelled). Partial work MAY still be billed — the exact policy
+is defined by the negotiation terms (Layer 6).
 
 ---
 
 ## 4. Endpoint Addressing
 
-ACMP endpoints are addressed as standard MCP server URIs. The transport binding (stdio, SSE, Streamable HTTP) is determined by the MCP connection setup.
+ACMP endpoints are addressed as standard MCP server URIs. The transport
+binding (stdio, SSE, Streamable HTTP) is determined by the MCP connection
+setup.
 
 For network-accessible agents, the canonical form is:
 
@@ -347,7 +411,9 @@ https://<host>/<path>
 
 Example: `https://compute.example.com/acmp/v1`
 
-Discovery of ACMP endpoints is handled by Layer 5 (ARD). An ARD resource descriptor includes the MCP endpoint URI and the advertised `acmp` capability object.
+Discovery of ACMP endpoints is handled by Layer 5 (ARD). An ARD resource
+descriptor includes the MCP endpoint URI and the advertised `acmp` capability
+object.
 
 ### Endpoint Identity
 
@@ -359,45 +425,64 @@ agent:<name>:<region>
 
 Example: `agent:openclaw-3:us-east`
 
-This identifier is self-reported (not cryptographically verified at Layer 1). Layer 7 (Agent Wallet & Identity) defines stronger identity mechanisms.
+This identifier is self-reported (not cryptographically verified at Layer 1).
+Layer 7 (Agent Wallet & Identity) defines stronger identity mechanisms.
 
 ---
 
 ## 5. Authentication
 
-ACMP defines two authentication mechanisms. To guarantee interoperability, every implementation **MUST support Bearer Token** as the baseline; **mTLS is OPTIONAL** (MAY). This ensures any two ACMP agents share at least one common mechanism.
+ACMP defines two authentication mechanisms. To guarantee interoperability,
+every implementation **MUST support Bearer Token** as the baseline; **mTLS is
+OPTIONAL** (MAY). This ensures any two ACMP agents share at least one common
+mechanism.
 
 ### 5.1 Bearer Token (baseline, MUST)
 
-The token is passed in the MCP connection setup (HTTP `Authorization` header for HTTP transports, environment variable for stdio).
+The token is passed in the MCP connection setup (HTTP `Authorization` header
+for HTTP transports, environment variable for stdio).
 
 ```
 Authorization: Bearer acmp_tok_7f8a9b3c...
 ```
 
-Token format and issuance are out of scope for this layer. Layer 7 (Agent Wallet) may define token issuance tied to agent identity.
+Token format and issuance are out of scope for this layer. Layer 7 (Agent
+Wallet) may define token issuance tied to agent identity.
 
 ### 5.2 Mutual TLS (mTLS, MAY)
 
-For zero-trust or untrusted networks where transport-level peer authentication is required. Both client and server present X.509 certificates during the TLS handshake. mTLS authenticates the *connection*; it complements rather than replaces the Bearer token, which authorizes the *agent*.
+For zero-trust or untrusted networks where transport-level peer authentication
+is required. Both client and server present X.509 certificates during the TLS
+handshake. mTLS authenticates the *connection*; it complements rather than
+replaces the Bearer token, which authorizes the *agent*.
 
-mTLS is recommended when agents operate across organizational or network boundaries that cannot be trusted beyond standard TLS.
+mTLS is recommended when agents operate across organizational or network
+boundaries that cannot be trusted beyond standard TLS.
 
 ---
 
 ## 6. Versioning
 
-The `acmp.version` field in the capability advertisement follows semantic versioning (`MAJOR.MINOR.PATCH`).
+The `acmp.version` field in the capability advertisement follows semantic
+versioning (`MAJOR.MINOR.PATCH`).
 
 - **PATCH** changes are backward-compatible bug fixes to the spec text.
-- **MINOR** changes add optional fields or new methods. Existing clients continue to work.
-- **MAJOR** changes break backward compatibility. Method names may be prefixed (e.g. `acmp.v2/invoke`) to allow parallel operation during migration.
+- **MINOR** changes add optional fields or new methods. Existing clients
+  continue to work.
+- **MAJOR** changes break backward compatibility. Method names may be prefixed
+  (e.g. `acmp.v2/invoke`) to allow parallel operation during migration.
 
-A buyer SHOULD check the provider's advertised `version` and the `features` map before relying on any optional behaviour. The current version is `0.1.0` (pre-release, breaking changes expected).
+A buyer SHOULD check the provider's advertised `version` and the `features`
+map before relying on any optional behaviour. The current version is `0.1.0`
+(pre-release, breaking changes expected).
 
 ### Relationship to other latency fields
 
-Layer 6 negotiation uses `max_latency_ms` (a quality-of-service SLA the provider commits to — e.g. "p99 response under 800ms"). Layer 1 `timeout_ms` is a different concept: the buyer's hard abort deadline for a specific invocation. A buyer typically sets `timeout_ms` comfortably above the negotiated `max_latency_ms` to absorb network jitter.
+Layer 6 negotiation uses `max_latency_ms` (a quality-of-service SLA the
+provider commits to — e.g. "p99 response under 800ms"). Layer 1 `timeout_ms`
+is a different concept: the buyer's hard abort deadline for a specific
+invocation. A buyer typically sets `timeout_ms` comfortably above the
+negotiated `max_latency_ms` to absorb network jitter.
 
 ---
 
@@ -405,28 +490,40 @@ Layer 6 negotiation uses `max_latency_ms` (a quality-of-service SLA the provider
 
 ### 7.1 Output streaming
 
-When a buyer sets `stream: true` in `acmp/invoke` (and the provider advertised `output_streaming: true`):
+When a buyer sets `stream: true` in `acmp/invoke` (and the provider advertised
+`output_streaming: true`):
 
-1. The provider sends zero or more `acmp/streamChunk` notifications with increasing `seq` numbers.
+1. The provider sends zero or more `acmp/streamChunk` notifications with
+   increasing `seq` numbers.
 2. The last chunk has `final: true`.
-3. After the final chunk, the provider sends the `acmp/result` response to close the JSON-RPC request, with `output_streamed: true` and `output` omitted (the buyer has already assembled the full output from the chunks).
+3. After the final chunk, the provider sends the `acmp/result` response to
+   close the JSON-RPC request, with `output_streamed: true` and `output`
+   omitted (the buyer has already assembled the full output from the chunks).
 
-If the provider did not advertise output streaming, it MAY ignore the `stream` flag and return a single `acmp/result`, or reject with -33007.
+If the provider did not advertise output streaming, it MAY ignore the `stream`
+flag and return a single `acmp/result`, or reject with -33007.
 
 ### 7.2 Input streaming
 
-When a buyer sets `input_stream: true` (and the provider advertised `input_streaming: true`):
+When a buyer sets `input_stream: true` (and the provider advertised
+`input_streaming: true`):
 
 1. The buyer omits `input` in `acmp/invoke` (or sends a partial prefix).
-2. The buyer sends `acmp/inputChunk` notifications with increasing `seq` numbers.
+2. The buyer sends `acmp/inputChunk` notifications with increasing `seq`
+   numbers.
 3. The final input chunk has `final: true`.
-4. The provider may begin processing as chunks arrive and produces its result as usual.
+4. The provider may begin processing as chunks arrive and produces its result
+   as usual.
 
-Input and output streaming MAY be combined (a fully streaming pipeline stage). This is the transport mechanism that Layer 2 §5 (streaming within DAGs) relies on.
+Input and output streaming MAY be combined (a fully streaming pipeline stage).
+This is the transport mechanism that Layer 2 §5 (streaming within DAGs) relies
+on.
 
 ### 7.3 Cancellation during streaming
 
-If the buyer sends `acmp/cancel` during streaming (input or output), the provider SHOULD stop emitting chunks, ignore further input chunks, and respond with error code -33004.
+If the buyer sends `acmp/cancel` during streaming (input or output), the
+provider SHOULD stop emitting chunks, ignore further input chunks, and respond
+with error code -33004.
 
 ---
 
@@ -451,27 +548,32 @@ If the buyer sends `acmp/cancel` during streaming (input or output), the provide
   but never pauses mid-task to ask the buyer for something and resume. A2A
   models exactly this with its `input-required` / `auth-required` states
   ([A2A-MAPPING.md](../A2A-MAPPING.md#state-model-comparison) flags the gap).
-  A candidate remedy is two new notifications — `acmp/interrupt`
-  (provider → buyer, carrying a `reason` of `input_required` / `auth_required`
-  and a machine-readable schema of exactly what is needed) and `acmp/resume`
-  (buyer → provider, supplying it) — plus a non-terminal `paused` task state
+  A candidate remedy is two new notifications — `acmp/interrupt` (provider →
+  buyer, carrying a `reason` of `input_required` / `auth_required` and a
+  machine-readable schema of exactly what is needed) and `acmp/resume` (buyer
+  → provider, supplying it) — plus a non-terminal `paused` task state
   (coordinated with [Layer 2 §2](02-task-format.md#2-task-states)). The
   hardest part is economic, not syntactic: a paused task holds escrow while it
   waits, so an interrupt needs an expiry after which the task is `abandoned`
-  and partially settled — a question owned by
-  [Layer 4](04-escrow-settlement.md#open-questions), not Layer 1. Left open
-  pending a cross-layer design; no wire change is made here.
+  and partially settled — a question owned by [Layer
+  4](04-escrow-settlement.md#open-questions), not Layer 1. Left open pending a
+  cross-layer design; no wire change is made here.
 
 ---
 
 ## Related
 
-- [Layer 1 — A2A Binding (shallow)](01-transport-a2a-binding.md) — the additive A2A binding for these same messages
+- [Layer 1 — A2A Binding (shallow)](01-transport-a2a-binding.md) — the
+  additive A2A binding for these same messages
 - [RFC-0001 §6](../RFC-0001-vision.md) — Protocol Stack Overview
-- [Layer 2 — Task Decomposition Format](02-task-format.md) — Task schema used in `acmp/invoke`
-- [Layer 5 — Discovery (ARD Binding)](05-discovery.md) — How endpoints are discovered
-- [Layer 6 — Negotiation Protocol](06-negotiation-protocol.md) — How price/terms are agreed before `acmp/invoke`
+- [Layer 2 — Task Decomposition Format](02-task-format.md) — Task schema used
+  in `acmp/invoke`
+- [Layer 5 — Discovery (ARD Binding)](05-discovery.md) — How endpoints are
+  discovered
+- [Layer 6 — Negotiation Protocol](06-negotiation-protocol.md) — How
+  price/terms are agreed before `acmp/invoke`
 
 ---
 
-*This document is part of the A2Agora specification. Licensed under Apache 2.0.*
+*This document is part of the A2Agora specification. Licensed under Apache
+2.0.*

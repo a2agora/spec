@@ -13,13 +13,13 @@ nav_order: 3.5
 
 ## Scope
 
-This document specifies an **additive** Layer 1 binding onto the
-[Agent2Agent Protocol (A2A)](https://github.com/a2aproject/A2A), alongside
-the MCP binding in [`01-transport.md`](01-transport.md). It does not change
-that document — MCP remains the baseline, unmodified. A provider MAY
-advertise this binding in addition to, or instead of, the MCP one; Layer 5
-discovery and the buyer's own transport preference decide which connection is
-opened. There is no protocol-level precedence rule between the two bindings.
+This document specifies an **additive** Layer 1 binding onto the [Agent2Agent
+Protocol (A2A)](https://github.com/a2aproject/A2A), alongside the MCP binding
+in [`01-transport.md`](01-transport.md). It does not change that document —
+MCP remains the baseline, unmodified. A provider MAY advertise this binding in
+addition to, or instead of, the MCP one; Layer 5 discovery and the buyer's own
+transport preference decide which connection is opened. There is no
+protocol-level precedence rule between the two bindings.
 
 This is the **shallow** strategy named in
 [A2A-MAPPING.md](../A2A-MAPPING.md#two-binding-strategies): ACMP's existing
@@ -30,8 +30,8 @@ remains future work; see [Open Questions](#open-questions).
 ### Normative Language
 
 The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY**
-in this document are to be interpreted as described in
-[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
+in this document are to be interpreted as described in [RFC
+2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 ---
 
@@ -69,8 +69,8 @@ identical, no schema change) travel inside the `data` Part of an A2A
 - The `data` Part's root object MUST be `{"acmp_method": "<method>", "params":
   {...}}` for requests and notifications. Responses and errors carry
   `acmp_result`/`acmp_error` as the root key instead, with the same field
-  contents as the corresponding JSON-RPC `result`/`error` object in
-  [Layer 1 §3](01-transport.md#3-message-schemas).
+  contents as the corresponding JSON-RPC `result`/`error` object in [Layer 1
+  §3](01-transport.md#3-message-schemas).
 - `task_id` is carried in **both** places: the A2A `Message.task_id` field
   (for A2A-native correlation without parsing the payload) and, unchanged,
   inside the ACMP `params` (for ACMP-side processing). This redundancy is
@@ -113,13 +113,13 @@ Card — declared, per the A2A specification, inside `capabilities.extensions`
 }
 ```
 
-Field meanings inside `params` are identical to
-[Layer 1 §1](01-transport.md#1-mcp-extension-model) — this is the same
-object, carried at a different location. A buyer MUST NOT rely on a feature
-the provider did not advertise here, exactly as it would not over the MCP
-binding. The provider MAY set the extension's `required` flag to `true` if it
-serves ACMP traffic exclusively; it SHOULD leave it `false` when the same
-Agent Card also serves plain A2A clients.
+Field meanings inside `params` are identical to [Layer 1
+§1](01-transport.md#1-mcp-extension-model) — this is the same object, carried
+at a different location. A buyer MUST NOT rely on a feature the provider did
+not advertise here, exactly as it would not over the MCP binding. The provider
+MAY set the extension's `required` flag to `true` if it serves ACMP traffic
+exclusively; it SHOULD leave it `false` when the same Agent Card also serves
+plain A2A clients.
 
 ---
 
@@ -150,9 +150,10 @@ optional and capability-gated (`heartbeat_interval_ms`).
 **Not supported** by this binding. A provider offering this binding MUST
 advertise `input_streaming: false` in its capability object
 ([§2](#2-capability-negotiation-via-agent-card)) — this is already an
-optional, capability-gated feature in [Layer 1 §1](01-transport.md#1-mcp-extension-model),
-so declining it here changes nothing structurally. This is a deliberate,
-documented gap rather than a forced-fit approximation.
+optional, capability-gated feature in [Layer 1
+§1](01-transport.md#1-mcp-extension-model), so declining it here changes
+nothing structurally. This is a deliberate, documented gap rather than a
+forced-fit approximation.
 
 ### 3.4 Error mapping
 
@@ -160,8 +161,8 @@ An ACMP error ([Layer 1 §3.3](01-transport.md#33-acmperror), codes `-33xxx`)
 stays entirely inside the payload: the enclosing A2A task reaches `completed`
 regardless. A2A has no knowledge of ACMP semantics and sees only a
 successfully delivered `data` Part. Generic A2A tooling (task lists,
-monitoring dashboards) sees an ACMP error only if it parses the payload —
-an accepted trade-off of the shallow strategy, not a defect to fix here.
+monitoring dashboards) sees an ACMP error only if it parses the payload — an
+accepted trade-off of the shallow strategy, not a defect to fix here.
 
 ---
 
@@ -185,10 +186,9 @@ an accepted trade-off of the shallow strategy, not a defect to fix here.
   Layer 2/6 assumptions — is deliberately out of scope here. See
   [A2A-MAPPING.md](../A2A-MAPPING.md#two-binding-strategies). It would let
   ACMP inherit A2A's `input-required`/`auth-required` resumable-interrupt
-  states essentially for free, closing the gap noted in
-  [Layer 1's own Open Questions](01-transport.md#open-questions) — but it is
-  a substantially bigger undertaking that deserves its own dedicated design
-  work if pursued.
+  states essentially for free, closing the gap noted in [Layer 1's own Open
+  Questions](01-transport.md#open-questions) — but it is a substantially
+  bigger undertaking that deserves its own dedicated design work if pursued.
 - `[OPEN]` **Negotiation via `input-required` (cross-layer note).** A2A's
   resumable-interrupt states could plausibly give Layer 6 (negotiation) a
   native "task paused, awaiting counter-offer" mechanism. This is a Layer 6
@@ -199,10 +199,13 @@ an accepted trade-off of the shallow strategy, not a defect to fix here.
 
 ## Related
 
-- [Layer 1 — Transport & Invocation](01-transport.md) — the MCP baseline, unchanged
-- [A2A-MAPPING.md](../A2A-MAPPING.md) — the analysis and rationale behind this binding
+- [Layer 1 — Transport & Invocation](01-transport.md) — the MCP baseline,
+  unchanged
+- [A2A-MAPPING.md](../A2A-MAPPING.md) — the analysis and rationale behind this
+  binding
 - [RFC-0001 §7](../RFC-0001-vision.md#7-open-questions)
 
 ---
 
-*This document is part of the A2Agora specification. Licensed under Apache 2.0.*
+*This document is part of the A2Agora specification. Licensed under Apache
+2.0.*

@@ -13,11 +13,11 @@ nav_order: 8
 
 ## Scope
 
-Defines the message exchange in which a buyer and a provider agree on
-**price and terms** before a task is executed. Negotiation sits between
-discovery ([Layer 5](05-discovery.md) tells the buyer *who* is capable) and
-execution ([Layer 1](01-transport.md) `acmp/invoke` runs the task under the
-agreed terms, [Layer 4](04-escrow-settlement.md) secures the payment).
+Defines the message exchange in which a buyer and a provider agree on **price
+and terms** before a task is executed. Negotiation sits between discovery
+([Layer 5](05-discovery.md) tells the buyer *who* is capable) and execution
+([Layer 1](01-transport.md) `acmp/invoke` runs the task under the agreed
+terms, [Layer 4](04-escrow-settlement.md) secures the payment).
 
 The key words **MUST**, **MUST NOT**, **SHOULD**, and **MAY** are interpreted
 as in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
@@ -41,11 +41,11 @@ L1:       acmp/invoke (+ escrow_id) ──▶ result
 ```
 
 The buyer typically locks escrow *before* negotiating (RFC-0001's sequence)
-and **binds** it to the chosen provider after accepting (Layer 4 §4.2) —
-which is also where the negotiated `challenge_window_ms` lands.
+and **binds** it to the chosen provider after accepting (Layer 4 §4.2) — which
+is also where the negotiated `challenge_window_ms` lands.
 
-All Layer 6 messages are JSON-RPC 2.0 requests over a standard ACMP
-connection (Layer 1).
+All Layer 6 messages are JSON-RPC 2.0 requests over a standard ACMP connection
+(Layer 1).
 
 ---
 
@@ -157,17 +157,17 @@ link them in escrow-less direct mode is `[OPEN]`.
 ## 3. Statelessness & Offer Validity
 
 Quoting MUST be **stateless** for the provider: an offer is a signed promise,
-not a reservation. No resources are held, nothing is booked — state is
-created only at *accept*. Combined with short validity windows, this is the
-primary defense against quote-spam: flooding a provider with offer requests
-costs it only quote computation, never capacity.
+not a reservation. No resources are held, nothing is booked — state is created
+only at *accept*. Combined with short validity windows, this is the primary
+defense against quote-spam: flooding a provider with offer requests costs it
+only quote computation, never capacity.
 
 Providers MAY additionally rate-limit offer requests per caller identity
 (Layer 1 connection auth, or a Layer 7 DID where available). Deposit-based
 anti-spam economics remain `[OPEN]`.
 
-An expired offer MUST be rejected at accept with -34002; the buyer's remedy
-is simply to request a fresh quote.
+An expired offer MUST be rejected at accept with -34002; the buyer's remedy is
+simply to request a fresh quote.
 
 ---
 
@@ -182,9 +182,9 @@ What is agreed here is consumed elsewhere. This table is normative glue:
 | `proof_method` | Layer 1 `invoke.proof_method`; the result's proof feeds Layer 3 verification and Layer 4 claims. |
 | `challenge_window_ms` | Layer 4 `escrowBind.challenge_window_ms` — the buyer carries the agreed value to the escrow agent. |
 
-**SLA violations after execution** are deliberately *not* a Layer 6 concern:
-a missed SLA on a delivered result is contested through the Layer 4 dispute
-path (with the signed offer as evidence) and priced in over time by Layer 7
+**SLA violations after execution** are deliberately *not* a Layer 6 concern: a
+missed SLA on a delivered result is contested through the Layer 4 dispute path
+(with the signed offer as evidence) and priced in over time by Layer 7
 reputation. Negotiation ends at accept.
 
 ---
@@ -192,11 +192,11 @@ reputation. Negotiation ends at accept.
 ## 5. Concurrent Fan-Out (the quasi-auction)
 
 A buyer MAY send `acmp/offerRequest` to any number of discovered providers
-**concurrently**, compare the returned offers, accept the best one, and
-simply let the others expire — no retraction message exists or is needed;
-validity windows do that work. From the market's perspective this *is* a
-sealed-bid auction, run buyer-side, with zero auction infrastructure. A
-protocol-level broadcast/auctioneer mode is `[OPEN]`.
+**concurrently**, compare the returned offers, accept the best one, and simply
+let the others expire — no retraction message exists or is needed; validity
+windows do that work. From the market's perspective this *is* a sealed-bid
+auction, run buyer-side, with zero auction infrastructure. A protocol-level
+broadcast/auctioneer mode is `[OPEN]`.
 
 ---
 
@@ -212,9 +212,8 @@ with the [reference SDK](https://github.com/a2agora/sdk-reference).
 | -34002 | `offer_expired` | Accept arrived after `valid_until_ms`. |
 | -34003 | `already_accepted` | Offers are single-use. |
 
-Budget and capability failures during quoting reuse the Layer 1 codes
-(-33001 `budget_exceeded`, -33002 `capability_not_found`, -33006
-`proof_unsupported`).
+Budget and capability failures during quoting reuse the Layer 1 codes (-33001
+`budget_exceeded`, -33002 `capability_not_found`, -33006 `proof_unsupported`).
 
 ---
 
@@ -238,19 +237,24 @@ Budget and capability failures during quoting reuse the Layer 1 codes
 - `[OPEN]` Auction mode: a broadcast RFQ with an auctioneer role — who runs
   it, and how does it stay P4/P6-compatible?
 - `[OPEN]` Deposit-based spam economics for offer requests.
-- `[OPEN]` Linking an accepted offer to the subsequent invoke in
-  escrow-less direct mode (an `offer_id` field on `acmp/invoke`?).
+- `[OPEN]` Linking an accepted offer to the subsequent invoke in escrow-less
+  direct mode (an `offer_id` field on `acmp/invoke`?).
 
 ---
 
 ## Related
 
-- [RFC-0001 §2](../RFC-0001-vision.md) — use cases this flow serves; §5 tasks-not-tokens pricing
-- [Layer 1 — Transport & Invocation](01-transport.md) — negotiated vs direct mode; `max_price_cu`, `timeout_ms`
-- [Layer 3 — Proof of Execution](03-proof-of-execution.md) — `proof_method` semantics
-- [Layer 4 — Escrow & Settlement](04-escrow-settlement.md) — `escrow_id` at accept, `challenge_window_ms` at bind
+- [RFC-0001 §2](../RFC-0001-vision.md) — use cases this flow serves; §5
+  tasks-not-tokens pricing
+- [Layer 1 — Transport & Invocation](01-transport.md) — negotiated vs direct
+  mode; `max_price_cu`, `timeout_ms`
+- [Layer 3 — Proof of Execution](03-proof-of-execution.md) — `proof_method`
+  semantics
+- [Layer 4 — Escrow & Settlement](04-escrow-settlement.md) — `escrow_id` at
+  accept, `challenge_window_ms` at bind
 - [Layer 7 — Wallet & Identity](07-agent-wallet.md) — the offer `sig` envelope
 
 ---
 
-*This document is part of the A2Agora specification. Licensed under Apache 2.0.*
+*This document is part of the A2Agora specification. Licensed under Apache
+2.0.*
