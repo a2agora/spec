@@ -31,6 +31,24 @@ Two concepts are kept strictly apart in this layer:
 - **Audit procedures** (§4) — what the *market does* to check such claims:
   dispute-triggered re-execution, or random spot-checks.
 
+A second, orthogonal distinction is worth naming, because it is easy to
+conflate with the first: **what a check is about**. A **per-call** check
+confirms that *one specific execution* produced the result it claims —
+runtime, tied to a single task, not reusable. A **definition-level** check
+confirms that a provider's declared capability or computation still matches
+what was agreed — slower, established out-of-band, and reusable across many
+calls. Every proof artifact in §3 is per-call: a proof travels with one
+result. Definition-level assurance is mostly established elsewhere in the
+stack — [Layer 6](06-negotiation-protocol.md) fixes the terms a task is
+judged against, and [Layer 7](07-agent-wallet.md) attests capability tiers
+and carries reputation between tasks. The one place the two meet is
+[§4.2](#42-statistical-spot-checking-random): spot-checking aggregates
+per-call audits into a provider-level signal, which is precisely why it can
+say something about a provider that no single proof can. Keeping the
+distinction in view avoids a common error: reading a per-call proof as
+evidence about the provider in general, or a capability attestation as
+evidence about the task at hand.
+
 ---
 
 ## 1. The Verification Problem
@@ -244,6 +262,22 @@ trade-offs:
 | Statistical batch verification | Compare output *distributions* over many tasks | Only detects systematic fraud, not single-task cheating. |
 | Domain verifiers | Code → run the tests; math → check the result | Excellent where checking is cheaper than generating; doesn't generalize to open-ended generation. |
 
+The domain-verifier row is the one with a shipping precedent. Google's [Open
+Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/tree/main/okf)
+v0.2 defines an *Attested Computation*: an executor returns a receipt
+(`job_id`, `executed_sql`, `result`), and a deliberately deterministic,
+LLM-free **attester** checks whether the query that ran equals the sanctioned
+computation bound with the claimed parameters, and whether the reported value
+matches the receipt — its reference attester canonicalizes SQL and refuses
+verification when the canonical forms differ. It is worth being precise about
+what this demonstrates: where a task *has* a canonical form, verification can
+be made cheap, deterministic, and free of any trusted judge. Where it does
+not, OKF does not attempt it — the mechanism is scoped to deterministic
+computations by design. That scoping is itself informative. An independent
+project arriving at the same boundary supports this section's position that
+the open-ended case is genuinely unsolved, rather than merely unaddressed
+here.
+
 Which regime (or mix) becomes normative for `re-execution-audit` verdicts is
 **the** open question of this layer — deliberately left to community input,
 with this section as the docking point.
@@ -296,6 +330,8 @@ with this section as the docking point.
   `proof_method` as a negotiated term
 - [Layer 7 — Wallet & Identity](07-agent-wallet.md) — signature envelope
   (proofs as evidence), DID-anchored reputation
+- [OKF — Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-catalog/tree/main/okf)
+  — external precedent: deterministic, LLM-free domain verification (§5)
 
 ---
 
