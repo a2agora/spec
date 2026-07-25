@@ -10,7 +10,7 @@ nav_order: 7
 | Layer | 5 |
 | Status | `external` |
 | Working Group | discovery |
-| Upstream | [ARD — Agentic Resource Discovery](https://agenticresourcediscovery.org) |
+| Substrate | [ARD — Agentic Resource Discovery](https://agenticresourcediscovery.org) — no published revision to pin |
 
 ## Scope
 

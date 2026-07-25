@@ -10,6 +10,7 @@ nav_order: 3.5
 | Layer | 1 (additive binding) |
 | Status | `draft` |
 | Working Group | transport |
+| Substrate | [A2A](https://a2a-protocol.org) `v1.0.1` |
 
 ## Scope
 

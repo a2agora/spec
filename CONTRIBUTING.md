@@ -50,6 +50,13 @@ Spec PRs don't need to be complete — a well-reasoned partial answer to an `[OP
 - Use present tense for normative statements ("The provider MUST...").
 - Use RFC 2119 keywords (MUST, SHOULD, MAY) for requirements once a layer moves from `discussion` to `draft`.
 - Keep `[OPEN]` markers for anything unresolved — don't paper over uncertainty.
+- A layer that binds onto an external standard records it in its header table
+  as `Substrate`, **pinned to the revision the text was written against**
+  (e.g. `MCP revision 2025-11-25`). Substrates move; a pin makes the drift
+  visible instead of silent. When you update a layer against a newer revision
+  of its substrate, update the pin in the same PR — and where a substrate
+  publishes no revision identifier at all, say so rather than omitting the
+  row.
 
 ## License
 

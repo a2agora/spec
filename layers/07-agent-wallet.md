@@ -10,6 +10,7 @@ nav_order: 9
 | Layer | 7 |
 | Status | `draft` |
 | Working Group | agent-wallet |
+| Substrate | [W3C DID Core 1.0](https://www.w3.org/TR/did-core/), [VC Data Model 2.0](https://www.w3.org/TR/vc-data-model/) |
 
 ## Scope
 

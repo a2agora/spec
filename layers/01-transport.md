@@ -10,6 +10,7 @@ nav_order: 3
 | Layer | 1 |
 | Status | `draft` |
 | Working Group | transport |
+| Substrate | [MCP](https://modelcontextprotocol.io) revision `2025-11-25` |
 
 ## Scope
 

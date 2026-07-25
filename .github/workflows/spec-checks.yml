@@ -1,0 +1,59 @@
+name: Spec checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  links:
+    name: Internal links resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check internal Markdown links and anchors
+        run: python3 .github/scripts/check_links.py
+
+  good-first-issue-reminder:
+    name: Good-first-issue relevance reminder
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # A `good first issue` promises a newcomer that a specific [OPEN] marker
+      # is still unanswered. Edits to spec text can silently retire one. This
+      # step does not judge — it puts the list in front of the reviewer at the
+      # moment the risk arises. It never fails the build.
+      - name: List open good-first-issues when spec text changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            -- 'layers/*.md' 'RFC-0001-vision.md' 'A2A-MAPPING.md')
+
+          if [ -z "$changed" ]; then
+            echo "No spec text touched by this PR — nothing to re-check."
+            exit 0
+          fi
+
+          echo "This PR edits spec text that open good-first-issues may point at:"
+          echo "$changed" | sed 's/^/  /'
+          echo
+          echo "For each issue below, confirm the [OPEN] bullet it references still"
+          echo "exists and is still unanswered. See CLAUDE.md for the full procedure."
+          echo
+          gh issue list --repo "$GITHUB_REPOSITORY" \
+            --label "good first issue" --state open \
+            || echo "  (could not query issues — check manually)"
