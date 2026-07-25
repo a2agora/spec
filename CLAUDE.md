@@ -12,6 +12,11 @@ or `A2A-MAPPING.md` — and after any merge in the sibling `sdk-reference` repo 
 implements a layer these issues reference (e.g. an escrow-agent PR can retire a
 Layer 4 open question even though no file in this repo changed):**
 
+CI helps but does not decide: `.github/workflows/spec-checks.yml` prints the
+open `good first issue` list on any PR that edits spec text, so the list is in
+front of you at review time. Judging whether a marker went stale is still
+yours.
+
 1. `gh issue list --repo a2agora/spec --label "good first issue" --state open`
 2. For each issue, open it and find the `[OPEN]` question(s) it points at
    (usually linked as `layers/NN-*.md#open-questions`).

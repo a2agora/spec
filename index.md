@@ -12,7 +12,7 @@ ACMP is the economic coordination layer that lets AI agents discover,
 negotiate, verify, and pay for compute autonomously. This is the full
 specification: a vision RFC plus seven independently-implementable layers.
 
-- Start with **[RFC-0001 — Vision & Problem Statement](RFC-0001-vision)** for the
+- Start with **[RFC-0001 — Vision & Problem Statement](RFC-0001-vision.md)** for the
   problem, design principles, and where ACMP fits in the agent stack.
 - Then browse the layer documents in the sidebar (Transport → Wallet & Identity).
 - A runnable **[reference SDK](https://github.com/a2agora/sdk-reference)** implements
