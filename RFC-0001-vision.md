@@ -297,6 +297,23 @@ total cost (cheaper models retry), quality signals — CU tiers, proof of
 execution (Layer 3), and verifiable reputation (Layer 7) — are protocol
 concerns, not afterthoughts.
 
+That the interesting quantity is a *ratio* rather than a raw capability
+score is not an ACMP idiosyncrasy. [ARC
+Prize](https://arcprize.org/leaderboard), which exists to measure machine
+intelligence, ranks systems on a scatter plot of cost-per-task against
+performance rather than in a league table, arguing that "true intelligence
+isn't just about solving problems, but solving them efficiently with minimal
+resources." Quoting an outcome in CU is what makes that ratio tradable:
+where a benchmark computes value-per-resource periodically and from a central
+authority, a market discovers the same quantity continuously and without one
+— which is what [Layer 6](layers/06-negotiation-protocol.md) negotiation is
+for.
+
+The limit of that parallel is instructive. ARC can compute cost-per-task
+because it holds the answer key; no such key exists for "summarize this
+document well." What a benchmark is handed, a market has to manufacture —
+the problem [Layer 3](layers/03-proof-of-execution.md) exists to solve.
+
 The industry is converging on the same task-not-token framing: Salesforce's
 [**Agentic Work Unit
 (AWU)**](https://www.salesforce.com/news/stories/agentic-work-units/) — "one
