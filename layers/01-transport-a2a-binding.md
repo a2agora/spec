@@ -83,11 +83,20 @@ identical, no schema change) travel inside the `data` Part of an A2A
 
 ## 2. Capability Negotiation via Agent Card
 
-A2A has no equivalent to MCP's `initialize` handshake. The `acmp` capability
-object from [Layer 1 §1](01-transport.md#1-mcp-extension-model) is instead
-carried as the `params` of an `AgentExtension` entry in the provider's Agent
-Card — declared, per the A2A specification, inside `capabilities.extensions`
-(an `AgentExtension` has `uri`, `description`, `required`, and `params`):
+Neither substrate uses a handshake for this any more: A2A never had one, and
+MCP removed `initialize` in revision `2026-07-28`. Both now declare
+extensions inside their capabilities — but in different shapes, which is
+worth keeping straight. MCP uses a **map** of extension identifier to a
+settings object; A2A uses an **array** of `AgentExtension` objects (`uri`,
+`description`, `required`, `params`). The `acmp` capability object from
+[Layer 1 §1](01-transport.md#1-mcp-extension-model) therefore travels as the
+`params` of an Agent Card extension entry.
+
+The two substrates also name the extension differently — `org.a2agora/acmp`
+under MCP's reverse-DNS rule, `https://a2agora.org/acmp/v0.1` under A2A's URI
+convention. **They denote the same extension.** The authoritative version is
+the `version` field inside the capability object; the `v0.1` in the A2A URI is
+part of that URI's own convention, not a second version number.
 
 ```json
 {
@@ -173,7 +182,7 @@ accepted trade-off of the shallow strategy, not a defect to fix here.
 |---|---|---|
 | Shallow or deep? | **Shallow** | Zero schema change, lowest risk, serves Principle P5 (incremental adoptability). Deep remains future work — see [Open Questions](#open-questions). |
 | Field placement? | **Inside the `data` Part, not `Message.metadata`** | Consistent with zero schema change. |
-| Capability transport? | **Extension `params` on the Agent Card** | A2A has no `initialize` equivalent; the Agent Card is the only static declaration point available. |
+| Capability transport? | **Extension `params` on the Agent Card** | Neither substrate has a handshake to carry it — the Agent Card is A2A's declaration point, as `server/discover` is MCP's. |
 | Error mapping? | **Payload-internal; the A2A task stays `completed`** | Consistent with shallow — the binding needs no knowledge of A2A's state machine. |
 | Input streaming? | **Not supported** | An honest gap rather than a forced fit; already optional and capability-gated in Layer 1. |
 

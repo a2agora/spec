@@ -71,18 +71,18 @@ verification.
 Layer 1 §4's `agent:<name>:<region>` identifier is **self-reported** and stays
 what it always was: a human-readable alias. The DID is authoritative:
 
-- An agent advertises its DID in the ACMP capability object:
+- An agent advertises its DID in the ACMP capability object — the same object
+  every binding carries, each in its own envelope ([Layer 1
+  §1](01-transport.md#1-mcp-extension-model) for MCP, [the A2A
+  binding](01-transport-a2a-binding.md#2-capability-negotiation-via-agent-card)
+  for A2A). Only the two identity fields are Layer 7's contribution:
 
 ```json
 {
-  "capabilities": {
-    "acmp": {
-      "version": "0.1.0",
-      "role": "provider",
-      "did": "did:web:compute.example.com",
-      "provider_id": "agent:openclaw-3:us-east"
-    }
-  }
+  "version": "0.1.0",
+  "role": "provider",
+  "did": "did:web:compute.example.com",
+  "provider_id": "agent:openclaw-3:us-east"
 }
 ```
 

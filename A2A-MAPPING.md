@@ -203,10 +203,11 @@ carried unchanged inside an A2A `SendMessage` call:
 ```
 
 The provider would declare this binding the same way AP2 declares itself — an
-`acmp` extension in its Agent Card, analogous to Layer 1's existing `acmp`
-capability object in the MCP `initialize` handshake. Per the A2A spec, Agent
-Card extensions are `AgentExtension` objects (`uri`, `description`,
-`required`, `params`) inside `capabilities.extensions`:
+`acmp` extension in its Agent Card, mirroring how Layer 1 declares the same
+object as an MCP extension. Both substrates put extensions inside
+`capabilities.extensions`, in different shapes: A2A uses `AgentExtension`
+objects (`uri`, `description`, `required`, `params`), MCP a map of extension
+identifier to settings.
 
 ```json
 {
