@@ -10,7 +10,7 @@ nav_order: 3
 | Layer | 1 |
 | Status | `draft` |
 | Working Group | transport |
-| Substrate | [MCP](https://modelcontextprotocol.io) revision `2025-11-25` |
+| Substrate | [MCP](https://modelcontextprotocol.io) revision `2026-07-28` |
 
 ## Scope
 
@@ -48,26 +48,37 @@ reported `cost_cu` MUST NOT exceed it.
 ## 1. MCP Extension Model
 
 ACMP defines custom JSON-RPC 2.0 methods under the `acmp/` namespace. An
-ACMP-capable MCP server (the **provider**) advertises ACMP support in its
-capability object during the standard MCP `initialize` handshake:
+ACMP-capable MCP server (the **provider**) declares ACMP support as an MCP
+**extension**: the entry `org.a2agora/acmp` in the `extensions` map of its
+server capabilities, which clients read from
+[`server/discover`](https://modelcontextprotocol.io/specification/2026-07-28/server/discover).
+The extension's settings object is the ACMP capability declaration:
 
 ```json
 {
   "capabilities": {
-    "acmp": {
-      "version": "0.1.0",
-      "role": "provider",
-      "accepts": ["acmp/invoke", "acmp/cancel", "acmp/inputChunk"],
-      "emits": ["acmp/streamChunk", "acmp/heartbeat"],
-      "features": {
-        "output_streaming": true,
-        "input_streaming": true,
-        "heartbeat_interval_ms": 5000
+    "extensions": {
+      "org.a2agora/acmp": {
+        "version": "0.1.0",
+        "role": "provider",
+        "accepts": ["acmp/invoke", "acmp/cancel", "acmp/inputChunk"],
+        "emits": ["acmp/streamChunk", "acmp/heartbeat"],
+        "features": {
+          "output_streaming": true,
+          "input_streaming": true,
+          "heartbeat_interval_ms": 5000
+        }
       }
     }
   }
 }
 ```
+
+The identifier follows MCP's mandatory vendor-prefix rule — a reverse-DNS
+name the publisher owns, here `a2agora.org` → `org.a2agora`. A buyer that
+needs to declare its own ACMP support does so symmetrically, in the
+`extensions` map of the client capabilities it carries in each request's
+`_meta`.
 
 - `accepts` lists the inbound methods the provider handles (buyer → provider).
   A provider lists `acmp/inputChunk` only if `input_streaming` is `true`.
@@ -80,8 +91,8 @@ capability object during the standard MCP `initialize` handshake:
   emits heartbeats for running tasks; the buyer uses it to compute its
   liveness window (see §3.6).
 
-If the `acmp` capability is absent, the server is a regular MCP server with no
-ACMP support.
+If the `org.a2agora/acmp` extension is absent, the server is a regular MCP
+server with no ACMP support.
 
 ### Why MCP
 
@@ -96,18 +107,25 @@ ACMP support.
 ### Transport Requirements
 
 Several ACMP messages are **provider-initiated notifications**
-(`acmp/streamChunk`, `acmp/heartbeat`). These require a transport that
-supports server-to-client messages. ACMP therefore requires a **bidirectional
-transport**:
+(`acmp/streamChunk`, `acmp/heartbeat`). Since MCP revision `2026-07-28`,
+servers no longer initiate JSON-RPC *requests*, but they do send
+*notifications* to the client — request-scoped, on the response stream of the
+request they belong to. Both ACMP notifications belong to a running
+`acmp/invoke` and travel on its response stream; neither is an out-of-band
+push, and neither needs a subscription.
 
-- **Supported:** HTTP+SSE, Streamable HTTP, stdio (all allow server→client
-  messages).
-- **Not supported:** plain request/response HTTP without a server-push
-  channel.
+ACMP therefore requires a transport whose response to a single request can
+carry more than one message:
 
-A provider that can only use a non-bidirectional transport MUST advertise
-`output_streaming: false` and MUST NOT emit notifications; buyers fall back to
-a single `acmp/result`.
+- **Supported:** Streamable HTTP, stdio.
+- **Not supported:** plain request/response HTTP without a streaming
+  response. MCP's earlier HTTP+SSE transport is Deprecated as of
+  `2026-07-28`; ACMP adds no requirement of its own here, it simply follows
+  the substrate.
+
+A provider whose transport cannot stream a multi-message response MUST
+advertise `output_streaming: false` and MUST NOT emit notifications; buyers
+fall back to a single `acmp/result`.
 
 ---
 
@@ -401,7 +419,7 @@ is defined by the negotiation terms (Layer 6).
 ## 4. Endpoint Addressing
 
 ACMP endpoints are addressed as standard MCP server URIs. The transport
-binding (stdio, SSE, Streamable HTTP) is determined by the MCP connection
+binding (stdio, Streamable HTTP) is determined by the MCP connection
 setup.
 
 For network-accessible agents, the canonical form is:
@@ -504,6 +522,16 @@ When a buyer sets `stream: true` in `acmp/invoke` (and the provider advertised
 If the provider did not advertise output streaming, it MAY ignore the `stream`
 flag and return a single `acmp/result`, or reject with -33007.
 
+**If the stream breaks.** MCP revision `2026-07-28` removed SSE stream
+resumability: a broken response stream loses the in-flight request, and the
+client must re-issue it rather than resume it. For ACMP that recovery is
+already defined — the buyer re-sends `acmp/invoke` with the **same
+`task_id`**, which §3.1.1 makes idempotent: the provider returns the existing
+result if the task completed, or treats the duplicate as a no-op if it is
+still running. Chunks received before the break are discarded; the buyer
+reassembles the output from the new stream. This is why `task_id` is
+buyer-generated and stable across retries.
+
 ### 7.2 Input streaming
 
 When a buyer sets `input_stream: true` (and the provider advertised
@@ -546,9 +574,15 @@ with error code -33004.
 
 - `[OPEN]` **Resumable interrupts (pause/resume).** Layer 1's seven message
   types assume *fire-and-execute*: a provider completes, streams, or fails,
-  but never pauses mid-task to ask the buyer for something and resume. A2A
-  models exactly this with its `input-required` / `auth-required` states
-  ([A2A-MAPPING.md](../A2A-MAPPING.md#state-model-comparison) flags the gap).
+  but never pauses mid-task to ask the buyer for something and resume. **Both
+  candidate substrates now model exactly this, independently of each other.**
+  A2A has its `input-required` / `auth-required` states
+  ([A2A-MAPPING.md](../A2A-MAPPING.md#state-model-comparison) flags the gap);
+  MCP added Multi Round-Trip Requests in revision `2026-07-28`, where a server
+  returns `resultType: "input_required"` and the client supplies what is
+  missing by **retrying the original request**. Two protocols converging on
+  the same shape raises the question from "a feature ACMP lacks" to "the
+  substrate consensus ACMP has not joined".
   A candidate remedy is two new notifications — `acmp/interrupt` (provider →
   buyer, carrying a `reason` of `input_required` / `auth_required` and a
   machine-readable schema of exactly what is needed) and `acmp/resume` (buyer

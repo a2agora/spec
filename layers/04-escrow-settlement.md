@@ -52,21 +52,19 @@ unless it arrives from the bound payee's identity. Note that `payee_id` itself
 is self-reported at this layer — verifiable identity binding is [Layer
 7](07-agent-wallet.md)'s job (e.g. W3C DIDs).
 
-An Escrow Agent advertises the capability in its MCP `initialize` handshake:
+An Escrow Agent declares the capability like any other ACMP role — the object
+below, carried in whichever envelope the binding in use specifies (see [Layer
+1 §1](01-transport.md#1-mcp-extension-model)):
 
 ```json
 {
-  "capabilities": {
-    "acmp": {
-      "version": "0.1.0",
-      "role": "escrow-agent",
-      "accepts": [
-        "acmp/escrowLock", "acmp/escrowBind", "acmp/escrowRelease",
-        "acmp/escrowReclaim", "acmp/escrowClaim", "acmp/escrowDispute",
-        "acmp/escrowStatus"
-      ]
-    }
-  }
+  "version": "0.1.0",
+  "role": "escrow-agent",
+  "accepts": [
+    "acmp/escrowLock", "acmp/escrowBind", "acmp/escrowRelease",
+    "acmp/escrowReclaim", "acmp/escrowClaim", "acmp/escrowDispute",
+    "acmp/escrowStatus"
+  ]
 }
 ```
 
