@@ -117,7 +117,7 @@ is left `[OPEN]`.
 ## 3. Identity Verification: `acmp/proveIdentity`
 
 A challenge–response that upgrades a self-reported identity to a verified one.
-Either peer MAY challenge the other at any point after the MCP handshake;
+Either peer MAY challenge the other at any time;
 buyers SHOULD challenge providers before first payment, and an Escrow Agent
 SHOULD challenge a payee before first payout.
 

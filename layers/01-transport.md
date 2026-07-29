@@ -419,8 +419,8 @@ is defined by the negotiation terms (Layer 6).
 ## 4. Endpoint Addressing
 
 ACMP endpoints are addressed as standard MCP server URIs. The transport
-binding (stdio, Streamable HTTP) is determined by the MCP connection
-setup.
+binding (stdio, Streamable HTTP) is determined by how the server is deployed
+and reached.
 
 For network-accessible agents, the canonical form is:
 
@@ -458,8 +458,10 @@ mechanism.
 
 ### 5.1 Bearer Token (baseline, MUST)
 
-The token is passed in the MCP connection setup (HTTP `Authorization` header
-for HTTP transports, environment variable for stdio).
+On HTTP transports the token accompanies **every request** in the
+`Authorization` header — MCP `2026-07-28` is stateless, so there is no
+connection-scoped moment to present it once. On stdio it is provided to the
+server process as an environment variable at launch.
 
 ```
 Authorization: Bearer acmp_tok_7f8a9b3c...
