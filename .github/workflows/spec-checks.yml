@@ -24,7 +24,6 @@ jobs:
   good-first-issue-reminder:
     name: Good-first-issue relevance reminder
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,12 +33,22 @@ jobs:
       # is still unanswered. Edits to spec text can silently retire one. This
       # step does not judge — it puts the list in front of the reviewer at the
       # moment the risk arises. It never fails the build.
+      #
+      # Runs on pushes to main as well as PRs: this repo's feature branches
+      # are merged locally, so for most changes the push is the only event
+      # CI ever sees.
       - name: List open good-first-issues when spec text changed
         env:
           GH_TOKEN: ${{ github.token }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
         run: |
+          # On a force-push or branch creation, `event.before` is the zero
+          # SHA and cannot anchor a diff — fall back to the last commit.
+          if [ -z "$BASE_SHA" ] || ! git cat-file -e "$BASE_SHA" 2>/dev/null; then
+            BASE_SHA=$(git rev-parse "$HEAD_SHA~1" 2>/dev/null || echo "$HEAD_SHA")
+          fi
+
           changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
             -- 'layers/*.md' 'RFC-0001-vision.md' 'A2A-MAPPING.md')
 
