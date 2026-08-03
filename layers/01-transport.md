@@ -199,7 +199,7 @@ Request from buyer to provider. Starts a compute task.
 | `stream` | boolean | `false` | If `true`, provider SHOULD send `acmp/streamChunk` notifications for the output. Provider MUST have advertised `output_streaming: true`. |
 | `input_stream` | boolean | `false` | If `true`, the buyer will send the input incrementally via `acmp/inputChunk`. Provider MUST have advertised `input_streaming: true`. |
 | `escrow_id` | string | — | Reference to a Layer 4 escrow lock. Absence means direct settlement. |
-| `proof_method` | string | — | Requested proof type from Layer 3 (`result-hash`, `execution-trace`, ...). |
+| `proof_method` | string | — | Requested proof type — a method from the [Layer 3 registry](03-proof-of-execution.md#3-proof-artifacts-method-registry). |
 
 #### 3.1.1 Idempotency & Retries
 
