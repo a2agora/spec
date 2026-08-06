@@ -250,7 +250,7 @@ chunks.
 | `task_id` | string | yes | Echoes the task_id from the invoke request. |
 | `output` | object | conditional | `{type, data}` — the result payload. MAY be omitted if `output_streamed` is `true` and the complete output was already delivered via `acmp/streamChunk`. |
 | `output_streamed` | boolean | no | If `true`, the output was delivered entirely through stream chunks; `output` is omitted to avoid duplicating large payloads. Default `false`. |
-| `tokens_used` | integer | yes | Actual tokens consumed. |
+| `tokens_used` | integer | no | Actual tokens consumed. Informational only — the price is fixed by the Layer 6 offer, not derived from this number. Omit it when the figure is not available: a provider reselling an upstream API may never see the token count behind hidden reasoning or provider-hosted tool calls. |
 | `cost_cu` | number | yes | Actual cost in CU. MUST be ≤ `max_price_cu` if the buyer provided it. |
 | `proof` | object | no | Proof of execution per Layer 3. Present if `proof_method` was requested. |
 | `provider_id` | string | no | Self-reported provider identity. |
