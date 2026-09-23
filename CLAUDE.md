@@ -26,8 +26,12 @@ yours.
      comment linking the commit/PR that resolved it.
    - Section renumbered/renamed → update the issue body's link, don't close it.
 4. If a merge added *new* `[OPEN]` bullets that are good newcomer-sized questions,
-   consider filing new `good first issue` entries via the issue-form templates
-   (`.github/ISSUE_TEMPLATE/`) rather than leaving them undiscoverable.
+   consider filing new `good first issue` entries rather than leaving them
+   undiscoverable. Write them in the house form the existing ones use —
+   **Context** (quote the `[OPEN]`, link the layer file), **Your task** (two to
+   four concrete angles), **Done =** (what a mergeable answer looks like).
+   The forms in `.github/ISSUE_TEMPLATE/` are for contributions arriving *from
+   outside* and are not the shape a maintainer-filed issue takes.
 
 Never assume an issue is still valid just because it's open — the label is a
 promise to newcomers that the task is real and doable; a stale one wastes their
