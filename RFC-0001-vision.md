@@ -125,14 +125,20 @@ the layers below into a functioning market.
 ACMP builds on three substrates it does not own. MCP ([Agentic AI
 Foundation](https://aaif.io)) solves communication — how agents talk to tools
 (its horizontal sibling **[A2A](https://github.com/a2aproject/A2A)**, Google's
-agent-to-agent protocol governed by the Linux Foundation, covers agents
-talking to each other; how ACMP's transport relates to each is an open
-question, see §7). ARD ([Microsoft, Google, Nvidia, et
+agent-to-agent protocol, covers agents talking to each other and has been
+hosted by the same foundation since August 2026; how ACMP's transport relates
+to each is an open question, see §7). ARD ([Microsoft, Google, Nvidia, et
 al.](https://agenticresourcediscovery.org)) solves discovery — how agents find
 capabilities. Settlement rails — most prominently **[x402](https://x402.org)**
 (open-sourced by Coinbase, now under the Linux Foundation with Visa,
-Mastercard, Google, Amazon, Stripe, and others) — solve *value movement*: how
-money actually flows once a price is agreed.
+Mastercard, Google, Amazon, Stripe, and others) and Stripe's and Tempo's
+**[Machine Payments Protocol (MPP)](https://mpp.dev)**, which carries the same
+request-pay-retry flow over cards as well as stablecoins — solve *value
+movement*: how money actually flows once a price is agreed. Card networks are
+building the same capability as a service (Mastercard's [Agent Pay for
+Machines](https://www.mastercard.com/us/en/news-and-trends/press/2026/june/mastercard-launches-agent-pay-for-machines.html),
+June 2026, with programmatically enforced spending limits and settlement across
+cards, accounts, and stablecoins).
 
 But a settlement rail is not a market. x402's flow is a single request → `402
 Payment Required` → pay → retry, with the price set unilaterally by the
@@ -175,7 +181,7 @@ agent, or an autonomous agent transacting on its own account.
 | Protocol | Domain | Principal | Core concern | Where it meets ACMP |
 |---|---|---|---|---|
 | **[UCP](https://ucp.dev)** (Universal Commerce Protocol) | Retail commerce — goods | A human | Product catalog, cart, checkout, order | A multi-binding blueprint (one service exposed over REST / MCP / A2A / embedded); and a UCP merchant selling *compute* as a product could use ACMP as the richer backend for the parts a generic checkout omits. |
-| **[AP2](https://ap2-protocol.org)** (Agent Payments Protocol) | Payment authorization | A human | Cryptographically signed Mandates proving genuine user intent; an A2A extension | AP2's mandates and ACMP's [Layer 7](layers/07-agent-wallet.md) spend limits address the same "delegate purchasing authority" problem — the natural comparison point if a human principal ever backs an ACMP buyer. |
+| **[AP2](https://ap2-protocol.org)** (Agent Payments Protocol) | Payment authorization | A human | Cryptographically signed Mandates proving genuine user intent; an A2A extension, contributed by Google to the [FIDO Alliance](https://fidoalliance.org/fido-alliance-to-develop-standards-for-trusted-ai-agent-interactions/) in April 2026 together with Mastercard's Verifiable Intent | AP2's mandates and ACMP's [Layer 7](layers/07-agent-wallet.md) spend limits address the same "delegate purchasing authority" problem — the natural comparison point if a human principal ever backs an ACMP buyer. |
 | **ACMP** | Compute market | The agent itself | Dynamic negotiation, proof of execution, escrow released against proof | — |
 
 Because AP2 and UCP both centre on a *human* principal — AP2's whole purpose
@@ -401,8 +407,8 @@ questions we want the community to answer:
    partially open for the native case.** Layer 1 is drafted as an MCP
    extension, but MCP is *vertical* (agent-to-tools) while ACMP's parties are
    peer agents — the *horizontal* shape that Google's
-   [A2A](https://github.com/a2aproject/A2A) protocol targets (governed by the
-   Linux Foundation, as is MCP's home the [Agentic AI
+   [A2A](https://github.com/a2aproject/A2A) protocol targets (since August
+   2026 hosted, like MCP, by the Linux Foundation's [Agentic AI
    Foundation](https://aaif.io)). [A2A-MAPPING.md](A2A-MAPPING.md) worked
    through a concrete message/state mapping and named two candidate binding
    strategies. The answer for the lower-risk one: **Layer 1 binds to both.**
