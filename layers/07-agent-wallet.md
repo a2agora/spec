@@ -276,10 +276,16 @@ Escrow Agent consults at payout time (Layer 4 §7.1):
 {
   "payout": [
     { "rail": "credit-ledger", "account": "acct_7f21c0" },
-    { "rail": "x402", "network": "base", "asset": "USDC", "address": "0x9a1f..." }
+    { "rail": "onchain-transfer", "network": "base", "asset": "USDC", "address": "0x9a1f..." }
   ]
 }
 ```
+
+An `onchain-transfer` entry means a direct transfer of `asset` on `network`
+to `address`. Payout entries name how the owner is *paid*, not how anyone
+*pays in*: a lock funded over x402 or MPP (Layer 4 §7.3–§7.4) pays out through
+whichever entry the payer and payee share, never through x402 or MPP itself,
+because both protocols move value only from client to server.
 
 Order expresses preference; the payer selects the first mutually supported
 rail. At least one entry MUST use a non-blockchain rail or the credit-ledger
