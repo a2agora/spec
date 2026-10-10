@@ -126,6 +126,12 @@ escrow MUST NOT execute the operation twice; it MUST return the outcome of the
 first execution. This makes every operation safe to retry after a network
 failure — the same rule Layer 1 §3.1.1 applies to `task_id`.
 
+A message the agent rejects **before changing any state** — invalid
+parameters, `-35002 insufficient_funds`, or a payment challenge (§7.4) — has
+not been executed. A later message with the same `op_ref` is processed as if
+it were the first, so a buyer can fix the cause (top up, pay) and retry
+without minting a new key.
+
 ---
 
 ## 4. Message Schemas
@@ -450,6 +456,121 @@ agent, between two instant rail hops. No hold/capture extension to x402 is
 required. This resolves the previously `[OPEN]` question on reconciling
 instant-settlement rails with escrow-on-proof.
 
+### 7.4 MPP binding (informative)
+
+The [Machine Payments Protocol](https://mpp.dev) (MPP), co-authored by Tempo
+Labs and Stripe, carries the same request → payment challenge → pay → retry
+pattern as x402 over several payment methods: stablecoins on various chains,
+Lightning, and — through Stripe's Shared Payment Tokens — cards. This binding
+targets the Internet-Drafts
+[`draft-httpauth-payment-01`](https://github.com/tempoxyz/mpp-specs/blob/main/specs/core/draft-httpauth-payment-01.md)
+(the core "Payment" scheme) and
+[`draft-payment-transport-mcp-00`](https://github.com/tempoxyz/mpp-specs/blob/main/specs/extensions/transports/draft-payment-transport-mcp-00.md)
+(its JSON-RPC and MCP transport). Both are drafts and may change.
+
+**MPP covers the funding edge only.** Money in MPP flows from client to
+server: a server charges for a resource, and there is no payer-initiated push
+to a third party. That fits funding a lock — the buyer pays the escrow agent —
+but not payout, where the agent would have to push value to the provider.
+Payouts therefore stay with the recipient's configured payout rail ([Layer
+7](07-agent-wallet.md), §7.1). Half of *settle in → hold → settle out* runs
+over MPP; the other half does not.
+
+**Funding a lock over MCP.** Escrow messages already travel over Layer 1, and
+MPP's MCP transport hooks payment into any JSON-RPC method. An escrow agent
+that funds locks over MPP answers an `acmp/escrowLock` the buyer's balance
+cannot cover with MPP's `-32042 Payment Required` instead of `-35002`,
+offering one or more payment challenges for the lock amount converted at the
+agent's rate (illustratively 1 CU = USD 1 below; MPP amounts are in the
+currency's smallest unit):
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "req_5c11aa",
+  "error": {
+    "code": -32042,
+    "message": "Payment Required",
+    "data": {
+      "httpStatus": 402,
+      "challenges": [{
+        "id": "qB3wErTyU7iOpAsD9fGhJk",
+        "realm": "escrow.example.com",
+        "method": "stripe",
+        "intent": "charge",
+        "request": {
+          "amount": "1250",
+          "currency": "usd",
+          "externalId": "op_7d40e2aa",
+          "methodDetails": { "networkId": "profile_…", "paymentMethodTypes": ["card"] }
+        },
+        "expires": "2026-10-10T12:05:00Z"
+      }]
+    }
+  }
+}
+```
+
+The buyer pays and **retries the same request with the same `op_ref`**,
+echoing the challenge in an MPP credential under `_meta`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "acmp/escrowLock",
+  "id": "req_5c11ab",
+  "params": {
+    "op_ref": "op_7d40e2aa",
+    "amount_cu": 12.5,
+    "valid_until_ms": 1783017900000,
+    "_meta": {
+      "org.paymentauth/credential": {
+        "challenge": { "id": "qB3wErTyU7iOpAsD9fGhJk", "…": "echoed unchanged" },
+        "payload": { "spt": "spt_1N4Zv32eZvKYlo2CPhVPkJlW" }
+      }
+    }
+  }
+}
+```
+
+The result is the ordinary §4.1 result (`escrow_id`, `state: "open"`, …),
+with MPP's receipt (`status`, `method`, `reference`, `challengeId`) under
+`result._meta["org.paymentauth/receipt"]`. Three existing rules do the rest:
+
+- The unpaid first call changes no state, so under §3 it has not been
+  executed and the paid retry with the same `op_ref` is processed afresh.
+  From then on §3 applies as usual: further retries return that one lock.
+- A rejected credential is MPP's `-32043`, which carries a fresh challenge.
+- `-35002 insufficient_funds` still applies when the agent offers no funding
+  path the buyer can use.
+
+The CU-to-currency rate behind the challenge amount is the agent's; CU
+exchange rates are open at RFC-0001 §5.
+
+**Small amounts.** Card fees make charging per lock uneconomic at the CU
+amounts single tasks involve. The cheaper pattern is to fund a **credit
+balance** at the agent (§7.2) over MPP in larger steps and lock against it.
+How an agent sells balance top-ups is agent-specific and outside the §4
+message set — for example an MPP-protected HTTP endpoint of the agent.
+
+**Cards, P4, and finality.** MPP's card path needs no blockchain, so it is a
+second external rail compatible with RFC-0001 P4 (§7.2 remains the mandatory
+path regardless). But a card charge is **not final**: MPP's charge intent
+names card chargebacks as a reversibility case. A card-funded lock can be
+reversed after the agent has already paid the provider out. That risk sits
+with the escrow agent, not with the protocol, and how to bear it — accept it,
+price it in, or fund locks only from final methods such as stablecoins — is
+agent policy.
+
+**Compatibility with MCP `2026-07-28`.** MPP's MCP draft predates the MCP
+revision Layer 1 pins, in two ways an implementer will notice. It advertises
+payment support in the `InitializeResult`, which `2026-07-28` removed together
+with the handshake; up-front advertisement is therefore an open question here
+(below). And `-32042`/`-32043` fall inside `-32020…-32099`, the range
+`2026-07-28` reserves for the MCP specification itself — no collision today,
+but MCP could assign those codes later. Neither affects the per-request flow
+above, which only uses `_meta` and an error code.
+
 ---
 
 ## Design Decisions
@@ -463,6 +584,7 @@ instant-settlement rails with escrow-on-proof.
 | Expiry | **Auto-reclaim at `valid_until_ms`; pending claim/dispute suspends expiry** | No stranded funds, and the clock can never expropriate a timely claim. |
 | Early-reclaim race | **Bound escrows cannot be reclaimed before a first release/claim resolution** | Otherwise a buyer could drain the escrow mid-task and beat the provider's claim to the punch — the guard makes the safety path race-free. |
 | Instant rails vs escrow-on-proof | **Rails at the edges (fund-in / payout-out), escrow held at the agent** | Dissolves the tension without requiring hold/capture semantics from any rail. |
+| MPP's role | **Funding edge only, via MPP's MCP transport on `acmp/escrowLock`** | MPP moves money client → server; payout would need a push MPP does not have. Hooking into the existing lock call reuses §3 idempotency and adds no method. |
 | Error range | **-35xxx** | -33xxx is Layer 1; -34xxx is de-facto negotiation. |
 
 ---
@@ -490,6 +612,18 @@ instant-settlement rails with escrow-on-proof.
   (`acmp/escrowResolved`?) instead of requiring `escrowStatus` polling?
 - `[OPEN]` CU tier exchange rates — who publishes them and how often do they
   update? (Tracked at RFC-0001 §5.)
+- `[OPEN]` **MPP sessions as a two-party lock?** MPP's session intent opens a
+  payment channel: the payer deposits funds, then signs cumulative vouchers as
+  service is delivered, and the unused deposit returns at close. That
+  resembles lock → partial release → reclaim between buyer and provider
+  directly, without a neutral agent — but without the provider claim,
+  challenge window, or dispute path either (§4.5–§4.6). Is there a useful
+  profile for low-value, low-risk tasks, or does losing the silent-buyer
+  protection rule it out?
+- `[OPEN]` Should the escrow-agent declaration (§1) advertise its funding rails
+  up front (e.g. which MPP methods it accepts), now that MPP's own MCP
+  advertisement relies on the removed `initialize` handshake (§7.4)? Today a
+  buyer learns them from the `-32042` challenge itself.
 
 ---
 
@@ -505,6 +639,8 @@ instant-settlement rails with escrow-on-proof.
   challenge window; `accept (+ escrow_id)`)
 - [Layer 7 — Agent Wallet](07-agent-wallet.md) (CU balance, payout rail
   configuration, verifiable identity)
+- [Machine Payments Protocol](https://mpp.dev) and its [specifications
+  repository](https://github.com/tempoxyz/mpp-specs) (funding-edge rail, §7.4)
 
 ---
 
