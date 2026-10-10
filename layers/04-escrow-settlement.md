@@ -450,21 +450,50 @@ escrow rather than in the middle:
   the amount **directly** on the network and in the asset named by the
   provider's `onchain-transfer` payout entry ([Layer 7
   §6.4](07-agent-wallet.md)). This hop is a plain on-chain transfer, not an
-  x402 exchange: every x402 scheme (`exact`, `upto`, `batch-settlement`) moves
-  value from a client to the resource server it calls, and a payout would
-  need the provider to run an x402 server that charges the agent. Instant
-  settlement *out of* escrow is exactly what the < 500 ms target wants.
+  x402 exchange: every x402 scheme in the [specification
+  repository](https://github.com/x402-foundation/x402/tree/main/specs/schemes)
+  (`exact`, `upto`, `batch-settlement`, `auth-capture`) moves value from a
+  client to the resource server it calls, and a payout would need the
+  provider to run an x402 server that charges the agent. Instant settlement
+  *out of* escrow is exactly what the < 500 ms target wants.
 
 In short: **settle in → hold → settle out.** The escrow guarantee lives at the
 agent, between two instant hops — x402 on the way in, a direct transfer on
-the way out. No hold/capture extension to x402 is
-required. This resolves the previously `[OPEN]` question on reconciling
-instant-settlement rails with escrow-on-proof.
+the way out. ACMP therefore needs no hold/capture semantics from the rail,
+although x402 now offers them (below). This resolves the previously `[OPEN]`
+question on reconciling instant-settlement rails with escrow-on-proof.
+
+**`auth-capture` as an on-chain escrow.** x402's
+[`auth-capture`](https://github.com/x402-foundation/x402/blob/main/specs/schemes/auth-capture/scheme_auth_capture.md)
+scheme (v1.1, 2026-08-18) holds funds — on EVM in an escrow contract — and
+maps closely onto this layer's states: `authorize` places the hold (lock),
+`capture` releases all or part of it to the recipient (release), and `void` —
+or the client's own `reclaim` once `captureDeadline` passes — returns the
+remainder (reclaim). In the [EVM
+binding](https://github.com/x402-foundation/x402/blob/main/specs/schemes/auth-capture/scheme_auth_capture_evm.md),
+`operatorType: "custom"` lets an operator contract add its own rules around
+the lifecycle, time locks and arbitration among them; such a contract is the
+*smart contract* variant of the Escrow Agent role (§1). Two limits keep it
+from being a drop-in binding:
+
+- **The payee is fixed at `authorize`.** The client's signed authorization
+  commits to every payment field, the recipient included, so a hold cannot be
+  bound to a provider later. That rules out RFC-0001's lock-before-selection
+  order and `acmp/escrowBind` (§4.2); it only fits locks taken after
+  negotiation, with `payee_id` known.
+- **Claims and disputes are not standardized.** x402 defines no provider
+  claim, challenge window, or dispute path (§4.5–§4.6). An operator contract
+  can implement them, but as its own rules, not as an interoperable
+  interface.
 
 x402 also defines an [MCP
-transport](https://github.com/coinbase/x402/blob/main/specs/transports-v1/mcp.md),
-so the funding edge can run inside the Layer 1 connection the same way §7.4
-describes for MPP.
+transport](https://github.com/x402-foundation/x402/blob/main/specs/transports-v2/mcp.md),
+but only for **tool calls**: the server answers `tools/call` with an
+`isError` result carrying the payment requirements, and the client retries
+with the payment under `_meta["x402/payment"]`. `acmp/escrowLock` is a
+JSON-RPC method, not an MCP tool, so unlike MPP (§7.4) x402 cannot fund a lock
+inside the Layer 1 connection without exposing the lock as a tool; over HTTP
+the funding edge works as described above.
 
 ### 7.4 MPP binding (informative)
 
@@ -617,7 +646,9 @@ above, which only uses `_meta` and an error code.
   tracks Layer 3.
 - `[OPEN]` Dispute arbitration: v0.1 leaves resolution to agent policy. Should
   a future version standardize an arbitration interface (e.g. a Layer 3
-  re-execution audit as neutral arbiter)?
+  re-execution audit as neutral arbiter)? x402's `auth-capture` leaves
+  arbitration to custom operator contracts (§7.3) — a hook, not an interface
+  ACMP could reference.
 - `[OPEN]` Should the agent push state-change notifications
   (`acmp/escrowResolved`?) instead of requiring `escrowStatus` polling?
 - `[OPEN]` CU tier exchange rates — who publishes them and how often do they
@@ -629,7 +660,9 @@ above, which only uses `_meta` and an error code.
   directly, without a neutral agent — but without the provider claim,
   challenge window, or dispute path either (§4.5–§4.6). Is there a useful
   profile for low-value, low-risk tasks, or does losing the silent-buyer
-  protection rule it out?
+  protection rule it out? x402's `auth-capture` (§7.3) is the closer
+  comparison: a hold with partial capture and a client reclaim after a
+  deadline, but likewise with the payee fixed up front and no claim path.
 - `[OPEN]` Should the escrow-agent declaration (§1) advertise its funding rails
   up front (e.g. which MPP methods it accepts), now that MPP's own MCP
   advertisement relies on the removed `initialize` handshake (§7.4)? Today a
