@@ -95,6 +95,26 @@ binding](01-transport-a2a-binding.md) — and `url` points at that card. ACMP
 defines no artifact type of its own: discovery finds an MCP server or A2A agent
 like any other, and the `acmp:` terms say that it also trades.
 
+**Why the ACMP terms cannot live in the card.** For MCP, the card is the
+[Server Card](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/2127-mcp-server-cards.md)
+(SEP-2127, status *Final*, extension `io.modelcontextprotocol/server-card`;
+wire format in the [extension
+repository](https://github.com/modelcontextprotocol/ext-server-card)). By
+design it advertises no MCP capabilities and no extension support — those
+depend on the client and the deployment and are negotiated live — and its
+namespaced `_meta` is explicitly not a substitute for them. A provider
+therefore cannot announce `org.a2agora/acmp` in its card. Before connecting, a
+buyer learns that a provider trades only from the `acmp:` terms in the ARD
+entry; after connecting, it confirms the extension through `server/discover`
+([Layer 1 §1](01-transport.md#1-mcp-extension-model)).
+
+**Publishing path.** SEP-2127 has MCP clients find Server Cards through an AI
+Catalog at `/.well-known/ai-catalog.json`, which ARD v0.91 treats as an
+optional predecessor of its own `/.well-known/ard.json`. A provider publishes
+its entry in `ard.json`, which every ARD consumer reads, and MAY list the same
+entry in `ai-catalog.json` as well, so that MCP clients following SEP-2127
+find the server too.
+
 **The ACMP namespace.** ARD v0.91 treats an entry as a JSON-LD node and admits
 terms from any namespace the entry declares in its `@context` (ARD §4.1).
 ACMP's namespace IRI is `https://a2agora.org/acmp/v0.1#` — the same URI the A2A
@@ -174,3 +194,5 @@ Building a competing discovery layer would be:
   advertised here)
 - [ARD Specification v0.91](https://agenticresourcediscovery.org/spec/) and its
   [base JSON-LD context](https://agenticresourcediscovery.org/context/v1)
+- [SEP-2127 — MCP Server Cards](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/2127-mcp-server-cards.md)
+  (the card an MCP provider's entry points at; carries no extension support)
