@@ -103,6 +103,9 @@ resolve to `https://a2agora.org/acmp/v0.1#tier` and so on. Registries match
 namespaced terms **by IRI, not by prefix**: a publisher that binds the
 namespace to a different prefix is still found by the same filter, while a
 term under an `acmp` prefix bound to any other IRI is simply not an ACMP term.
+The binding therefore lives inline in the entry; discovery needs no separate
+ACMP endpoint. How fast-moving figures stay fresh is the push-vs-pull question
+below.
 
 `acmp:price_cu_indicative` is declared `@json` because it is the one ACMP term
 whose value is an object with free-form keys. Without that declaration, JSON-LD
@@ -151,10 +154,6 @@ Building a competing discovery layer would be:
 
 ## Open Questions
 
-- `[OPEN]` ARD v0.91 settles *where* the binding lives: inline, as namespaced
-  terms in the entry. Does ACMP additionally need a separate endpoint — for
-  example for figures that change faster than a crawled manifest is
-  re-indexed — or is the Layer 6 quote enough for anything time-sensitive?
 - `[OPEN]` Should a vocabulary or JSON-LD context document be published at
   `https://a2agora.org/acmp/v0.1#`, so that generic tooling can resolve the
   `acmp:` terms (including the `@json` declaration) without each entry

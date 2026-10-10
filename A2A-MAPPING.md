@@ -308,7 +308,9 @@ effect for the strategy that carried the lowest risk.
 - [A2A Protocol](https://github.com/a2aproject/A2A)
   ([spec](https://a2a-protocol.org/latest/specification/))
 - [Agent Payments Protocol (AP2)](https://ap2-protocol.org/) — the A2A
-  extension precedent (payment authorization via Mandates)
+  extension precedent (payment authorization via Mandates); developed under the
+  [FIDO Alliance](https://fidoalliance.org/fido-alliance-to-develop-standards-for-trusted-ai-agent-interactions/)
+  since April 2026
 - [Universal Commerce Protocol (UCP)](https://ucp.dev/) — the multi-binding
   precedent (one service over REST/MCP/A2A/Embedded)
 
