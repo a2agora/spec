@@ -446,15 +446,25 @@ escrow rather than in the middle:
   x402 (agent responds `402 Payment Required` for the lock amount; buyer pays;
   lock opens). Instant settlement *into* escrow is unproblematic — the funds
   are now held by the neutral agent.
-- **Payout edge:** after a release (or resolved claim), the agent pays the
-  provider over x402 to the wallet advertised in its Layer 7 configuration.
-  Instant settlement *out of* escrow is exactly what the < 500 ms target
-  wants.
+- **Payout edge:** after a release (or resolved claim), the agent transfers
+  the amount **directly** on the network and in the asset named by the
+  provider's `onchain-transfer` payout entry ([Layer 7
+  §6.4](07-agent-wallet.md)). This hop is a plain on-chain transfer, not an
+  x402 exchange: every x402 scheme (`exact`, `upto`, `batch-settlement`) moves
+  value from a client to the resource server it calls, and a payout would
+  need the provider to run an x402 server that charges the agent. Instant
+  settlement *out of* escrow is exactly what the < 500 ms target wants.
 
 In short: **settle in → hold → settle out.** The escrow guarantee lives at the
-agent, between two instant rail hops. No hold/capture extension to x402 is
+agent, between two instant hops — x402 on the way in, a direct transfer on
+the way out. No hold/capture extension to x402 is
 required. This resolves the previously `[OPEN]` question on reconciling
 instant-settlement rails with escrow-on-proof.
+
+x402 also defines an [MCP
+transport](https://github.com/coinbase/x402/blob/main/specs/transports-v1/mcp.md),
+so the funding edge can run inside the Layer 1 connection the same way §7.4
+describes for MPP.
 
 ### 7.4 MPP binding (informative)
 
