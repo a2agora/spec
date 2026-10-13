@@ -359,6 +359,26 @@ providers, Escrow Agents) MAY return them.
   revoked key must stop verifying?
 - `[OPEN]` **Per-instance identity in fleets:** should sub-agents be
   expressible as sub-DIDs / delegated keys of the wallet DID?
+- `[OPEN]` **Supply provenance:** how does a buyer tell legitimately operated
+  idle capacity (RFC-0001 §2.4) from hardware a third party has compromised?
+  The protocol currently controls who may *pay* (§2.3, §6.2), not who may
+  *sell*: Layer 3 attests that work was executed, not that the provider
+  lawfully controls the machine, and reputation here accrues to a DID, not to
+  ownership of hardware. Anthropic's Frontier Red Team has shown small
+  open-weight models setting up inference on unfamiliar, cheap edge devices
+  and replicating across a test fleet, and argues that autonomous replication
+  onto compromised edge hardware is approaching ([„AI models may be capable of
+  self-replicating without access to a
+  datacenter"](https://www.anthropic.com/research/self-replicating-ai),
+  12 October 2026) — such compute could be offered as "idle capacity".
+  Candidate signals, none sufficient alone: an operator credential issued as a
+  VC (§5, and the issuer-trust question above); hardware attestation
+  (`tee-attestation`, [Layer 3](03-proof-of-execution.md) §3.2), which today
+  proves only that measured code ran on genuine hardware and would have to be
+  extended to bind the machine to its operator; reputation that requires a
+  minimum age before it counts; and liability or a bond, e.g. the staking discussed for
+  tiers (RFC-0001 §7, question 2). None of them helps when a legitimate
+  operator's device *and* key are taken over together.
 
 ---
 
