@@ -228,7 +228,12 @@ serve them locally — so the supply side of a compute market is not just
 datacenters but a long tail of small, mutually unknown operators. Precisely
 that long tail is why proof of execution (Layer 3) and reputation (Layer 7)
 are protocol concerns: a market of strangers cannot run on curated provider
-lists.
+lists. The same openness also admits compromised hardware offered as "idle
+capacity" — small models can increasingly set up inference on cheap edge
+devices on their own ([Anthropic,
+2026](https://www.anthropic.com/research/self-replicating-ai)) — and telling
+the two apart is open ([Layer 7](layers/07-agent-wallet.md), *Supply
+provenance*).
 
 ---
 
