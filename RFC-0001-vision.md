@@ -399,8 +399,28 @@ questions we want the community to answer:
    non-blockchain positioning that is itself a selling point (§1, and P4).
    Staking is implementable without a chain, so the friction is the
    positioning, not the technique — a trade-off to weigh, not resolve here.
-3. **Regulatory framing** — is a CU a commodity, e-money, or a security under
-   major jurisdictions (EU, US)?
+3. **Regulatory framing** — three sub-questions, none answered here:
+   - **The unit:** is a CU a commodity, e-money, or a security under major
+     jurisdictions (EU, US)?
+   - **Authorization:** in law, an ACMP buyer is an operator acting through a
+     standing mandate — the spend limits of [Layer 7](layers/07-agent-wallet.md)
+     §6.2. Does such a mandate count as payment authorization under Art. 64
+     PSD2, and how do strong customer authentication and its exemptions (low
+     value, trusted beneficiaries, transaction risk analysis) apply when no
+     human approves the individual payment?
+   - **Licensing:** does a wallet that initiates payments on its own act as a
+     payment initiation service, and does an escrow agent ([Layer
+     4](layers/04-escrow-settlement.md)) that holds third parties' funds need
+     a licence (in Germany, for instance, under the ZAG)?
+
+   The Deutsche Bundesbank's monthly report of September 2026 ([„Agentic
+   Payments: Wenn Zahlungen denken lernen"](https://publikationen.bundesbank.de/publikationen-de/berichte-studien/monatsberichte/monatsbericht-september-2026-1007720?article=agentic-payments-wenn-zahlungen-denken-lernen-1007712),
+   21 September 2026) names the authorization, initiation-service and
+   authentication questions as open for largely autonomous agents — the case
+   ACMP describes. The escrow question is ours: the report does not discuss
+   escrow, but Layer 4 raises it. Our assessment, not the report's: for the
+   small operators of §2.4 these licensing burdens weigh heavier than for
+   incumbents.
 4. **Circuit breakers** — in an all-agent market operating at millisecond
    speed, what prevents flash crashes?
 5. **Transport substrate (MCP vs. A2A) — answered for the additive case,

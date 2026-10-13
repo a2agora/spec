@@ -42,6 +42,18 @@ itself MUST NOT be able to override:
    have no interface to raise its own limits.
 3. **The audit log** — append-only, operator-readable (§6.3).
 
+Together these bind a probabilistic decision-maker to deterministic rules
+before anything executes: the agent may reason its way to any payment, but
+only payments within fixed, operator-set limits leave the wallet, signed with
+keys it never holds, and every one is recorded. That separation is what the
+Deutsche Bundesbank names as the precondition for agentic payments — turning
+probabilistic decisions into binding, deterministic processes before
+execution, under clear mandates with documentation and escalation ([Monthly
+Report, September
+2026](https://publikationen.bundesbank.de/publikationen-de/berichte-studien/monatsberichte/monatsbericht-september-2026-1007720?article=agentic-payments-wenn-zahlungen-denken-lernen-1007712)).
+Whether such a mandate also satisfies payment law is open (RFC-0001 §7,
+question 3).
+
 The wallet holds **CU credits**; it does not hold private keys to external
 value (fiat, stablecoin). Redemption of CU happens via the settlement layer
 ([Layer 4 §7](04-escrow-settlement.md)).
