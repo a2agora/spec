@@ -359,6 +359,13 @@ providers, Escrow Agents) MAY return them.
   revoked key must stop verifying?
 - `[OPEN]` **Per-instance identity in fleets:** should sub-agents be
   expressible as sub-DIDs / delegated keys of the wallet DID?
+  Precedent: the IETF WIMSE working group's
+  [`draft-ietf-wimse-aims-00`](https://datatracker.ietf.org/doc/draft-ietf-wimse-aims/)
+  (working-group draft, informational, 15 September 2026) requires every
+  agent to hold exactly one identifier — a workload identity such as a SPIFFE
+  ID rather than a DID. That supports one identity per economic actor (§2.4)
+  but leaves open what counts as an agent instance in a fleet, so it does not
+  settle this question.
 - `[OPEN]` **Supply provenance:** how does a buyer tell legitimately operated
   idle capacity (RFC-0001 §2.4) from hardware a third party has compromised?
   The protocol currently controls who may *pay* (§2.3, §6.2), not who may

@@ -351,6 +351,15 @@ are unresolved — as is the CU's technical representation: an account balance
 held with an escrow agent, or a true bearer instrument (e.g. Chaumian
 blind-signed e-cash, see Layer 4 §7.2). See [Layer
 4](layers/04-escrow-settlement.md) and [Layer 7](layers/07-agent-wallet.md).
+For exchange rates between tiers, commodity markets offer one candidate:
+BlackRock's position paper [*The Machine-Native
+Economy*](https://www.blackrock.com/us/individual/literature/whitepaper/the-machine-native-economy.pdf)
+(September 2026) names the same obstacles for standardized compute products —
+differing chip generations, regional costs, cash settlement versus delivery —
+and points to basis markets and contracts for difference, which make
+heterogeneous goods tradable against a reference. Applied here: one reference
+tier, with a traded premium or discount per tier. The paper argues for
+digital-asset products, which is worth keeping in mind when citing it.
 
 ---
 
