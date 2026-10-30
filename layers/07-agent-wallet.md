@@ -241,6 +241,12 @@ Providers MAY attach VCs to Layer 6 offers and to their discovery entries
 is trusted as an issuer** — a certification body, a marketplace operator, a
 web-of-trust — is an ecosystem question and remains `[OPEN]`.
 
+Legal status is another claim of this kind. An entity form that must disclose
+its status to counterparties — such as Delaware's draft Artificial
+Intelligence Company (RFC-0001 §7, question 3) — could carry that disclosure
+as a VC issued by the registering authority, so that a counterparty verifies
+it rather than taking the agent's word for it.
+
 ---
 
 ## 6. Wallet Interface

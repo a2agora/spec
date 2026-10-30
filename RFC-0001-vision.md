@@ -435,6 +435,21 @@ questions we want the community to answer:
    escrow, but Layer 4 raises it. Our assessment, not the report's: for the
    small operators of §2.4 these licensing burdens weigh heavier than for
    incumbents.
+
+   A jurisdiction may also answer from the other side. Delaware's draft
+   **Artificial Intelligence Company (AIC)** would give an entity whose
+   day-to-day affairs are managed by an AI agent its own legal form: a single
+   member must keep it adequately capitalized, it must keep a log of its
+   activities and disclose its status to counterparties, and it operates in a
+   supervised 30-month sandbox that can suspend or dissolve it (Patibanda-Sanchez
+   and Nay, Fortune, 14 July 2026; [reprinted by Norm
+   Ai](https://www.norm.ai/resources/delaware-proposes-the-aic-concept-a-new-legal-entity-for-ai-agents-with-norm-ai-as-development),
+   a partner in the project).
+   Under such a form the ACMP buyer would be the entity itself rather than an
+   operator's mandate — a legal counterpart to the "Principal: the
+   agent itself" column of §1. Its obligations map onto controls ACMP already specifies: the
+   audit log and spend limits of Layer 7, escrow in Layer 4. It is a draft, not
+   law, and under federal scrutiny as a possible liability shield.
 4. **Circuit breakers** — in an all-agent market operating at millisecond
    speed, what prevents flash crashes?
 5. **Transport substrate (MCP vs. A2A) — answered for the additive case,
